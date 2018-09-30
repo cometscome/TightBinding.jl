@@ -1,5 +1,8 @@
 module TightBinding
-    export set_Lattice,add_atoms!,add_hoppings!
+    using LinearAlgebra
+    using Plots
+    export set_Lattice,add_atoms!,add_hoppings!,add_diagonals!,hamiltonian_k,
+    dispersion
 
     struct Hopping
         amplitude
@@ -56,7 +59,7 @@ module TightBinding
         end
     end
 
-    function hamiltonian(lattice)
+    function hamiltonian_k(lattice)
         numatoms = lattice.numatoms
         diagonals = zeros(Float64,numatoms)
         vectors = lattice.vectors
@@ -101,6 +104,49 @@ module TightBinding
 
         end
         k -> calc_ham(k)
+    end
+
+    function dispersion(dim,n,ham,k)
+        if n==1
+            return [ham(k)[1]]
+        else
+            energy = eigen(ham(k)).values
+            return energy
+        end
+    end
+
+    function calc_band(kmin,kmax,nk,lattice,ham)
+        n = lattice.numatoms
+        dim = lattice.dim
+        energies = zeros(Float64,n,nk)
+        vec_k = zeros(Float64,dim,nk)
+        for idim=1:dim
+            k = range(kmin[idim],length=nk,stop=kmax[idim])
+            vec_k[idim,:] = k[:]
+        end
+        for ik = 1:nk
+            energies[:,ik] = dispersion(dim,n,ham,vec_k[ik])
+        end
+
+        return vec_k,energies
+    end
+
+    function test_1D()
+        la1 = set_Lattice(1,[[1.0]])
+        add_atoms!(la1,[0,0])
+        t = 1.0
+        add_hoppings!(la1,-t,1,1,[1])
+        ham1 = hamiltonian_k(la1)
+        kmin = [-π]
+        kmax = [π]
+        nk = 20
+        vec_k,energies = calc_band(kmin,kmax,nk,la1,ham1)
+        println(energies)
+        #k = [0.0]
+        #dispersion(la1.dim,la1.numatoms,ham1,k)
+        pls = plot(vec_k[1,:],energies[1,:],marker=:circle,label=["1D"])
+        savefig("1Denergy.png")
+
     end
 
 greet() = print("Hello World!")

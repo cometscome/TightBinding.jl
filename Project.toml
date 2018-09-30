@@ -1,6 +1,7 @@
-authors = ["Yuki <cometscome@gmail.com>"]
 name = "TightBinding"
 uuid = "4482633c-c459-11e8-019e-737cadda7745"
+authors = ["Yuki <cometscome@gmail.com>"]
 version = "0.1.0"
 
 [deps]
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
