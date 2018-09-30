@@ -1,0 +1,6 @@
+authors = ["Yuki <cometscome@gmail.com>"]
+name = "TightBinding"
+uuid = "4482633c-c459-11e8-019e-737cadda7745"
+version = "0.1.0"
+
+[deps]
