@@ -1,7 +1,107 @@
 module TightBinding
+    module plotfuncs
+        using Plots
+        using ..TightBinding
+        export plot_lattice_2d,calc_band_plot
+
+
+        function plot_lattice_2d(lattice)
+            dim = lattice.dim
+            lw = 0.5
+            ls = :dash
+            colors = ["red","blue","orange","brown","yellow"]
+            println("Plot the 2D lattice structure")
+            if dim != 2
+                println("Error! dim should be 2 to plot the lattice. dim is $dim")
+                return
+            end
+            pls = plot(size=(500,500), legend=false)
+            r0 = [0,0]
+            r1 = lattice.vectors[1]
+            r2 = lattice.vectors[2]
+
+            na = 2
+            nb = 2
+
+            for ia = 0:na
+                for ib=0:nb
+                    rorigin = lattice.vectors[1]*ia +  lattice.vectors[2]*ib
+                    plot!([r0[1]+rorigin[1], r1[1]+rorigin[1]],
+                    [r0[2]+rorigin[2], r1[2]+rorigin[2]], color="red", lw=lw, ls=ls)
+                    plot!([r0[1]+rorigin[1], r2[1]+rorigin[1]],
+                    [r0[2]+rorigin[2], r2[2]+rorigin[2]], color="red", lw=lw, ls=ls)
+                    plot!([r1[1]+rorigin[1], r1[1]+r2[1]+rorigin[1]],
+                    [r1[2]+rorigin[2], r1[2]+r2[2]+rorigin[2]], color="red", lw=lw, ls=ls)
+                    plot!([r2[1]+rorigin[1], r1[1]+r2[1]+rorigin[1]],
+                    [r2[2]+rorigin[2], r1[2]+r2[2]+rorigin[2]], color="red", lw=lw, ls=ls)
+
+                    for i=1:lattice.numatoms
+                        x,y = get_position(lattice,lattice.positions[i])
+                        plot!([x+rorigin[1]],[y+rorigin[2]],marker=:circle,color=colors[i])
+                    end
+
+                    for i=1:lattice.numhopps
+                        ijpositions = lattice.hoppings[i].ijpositions
+                        x,y = get_position(lattice,ijpositions)
+                        ijatoms = lattice.hoppings[i].ijatoms
+                        x0,y0 = get_position(lattice,lattice.positions[ijatoms[1]])
+                        plot!([x0+rorigin[1], x0+x+rorigin[1]],
+                        [y0+rorigin[2], y0+y+rorigin[2]], color="black", lw=1)
+                    end
+                end
+            end
+            plot!(aspect_ratio=:equal)
+            return pls
+        end
+
+        function calc_band_plot(klines,lattice)
+            ham = hamiltonian_k(lattice)
+            numlines = klines.numlines
+            dim = lattice.dim
+            klength = 0.0
+            vec_k = []
+            numatoms = lattice.numatoms
+            energies = zeros(Float64,numatoms,0)
+            #plot(x,xticks=([4,5],["G","F"]))
+            xticks_values = []
+            xticks_labels = []
+
+            for i=1:numlines
+                push!(xticks_values,klength)
+                push!(xticks_labels,klines.kpoints[i].name)
+                kmin = klines.kpoints[i].kmin
+                kmax = klines.kpoints[i].kmax
+                nk = klines.kpoints[i].nk
+
+
+                kmin_real = kmin[:]
+                kmax_real = kmax[:]
+
+                kdistance = sqrt(sum((kmin_real .- kmax_real).^2))
+                vec_k_temp,energies_i = calc_band(kmin_real,kmax_real,nk,lattice,ham)
+                vec_k_i = range(klength,length=nk,stop=klength+kdistance)
+                vec_k = vcat(vec_k,vec_k_i)
+                energies = hcat(energies,energies_i)
+                klength += kdistance
+            end
+
+            pls = plot(vec_k[:],[energies[i,:] for i=1:dim],
+                            xticks = (xticks_values,xticks_labels))
+
+            return pls
+        end
+
+        function plot_DOS(lattice)
+
+        end
+
+    end
+
+    using Plots
+    using .plotfuncs
     using LinearAlgebra
     export set_Lattice,add_atoms!,add_hoppings!,add_diagonals!,hamiltonian_k,
-    dispersion
+    dispersion,get_position,calc_band
 
     struct Hopping
         amplitude
@@ -13,6 +113,7 @@ module TightBinding
         kmin::Array{<:Number,1}
         kmax::Array{<:Number,1}
         nk::Int8
+        name
     end
 
     mutable struct Klines
@@ -26,8 +127,8 @@ module TightBinding
         return klines
     end
 
-    function add_Kpoints!(klines,kmin,kmax,nk)
-        kpoint = Kpoints(kmin,kmax,nk)
+    function add_Kpoints!(klines,kmin,kmax,nk,name)
+        kpoint = Kpoints(kmin,kmax,nk,name)
         klines.numlines += 1
         push!(klines.kpoints,kpoint)
     end
@@ -130,6 +231,9 @@ module TightBinding
         end
     end
 
+
+
+
     function add_hoppings!(lattice,amplitude,iatom,jatom,hopping)
         hop = Hopping(amplitude,[iatom,jatom],hopping)
         lattice.numhopps += 1
@@ -145,6 +249,14 @@ module TightBinding
         for i=1:length(diagonals)
             push!(lattice.diagonals,diagonals[i])
         end
+    end
+
+    function get_position(lattice,vec)
+        position = zeros(Float64,lattice.dim)
+        for i=1:lattice.dim
+            position += vec[i]*lattice.vectors[i]
+        end
+        return position
     end
 
 
@@ -225,31 +337,7 @@ module TightBinding
         return vec_k,energies
     end
 
-    function calc_band_plot(klines,lattice,ham)
-        numlines = klines.numlines
-        dim = lattice.dim
-        klength = 0.0
-        vec_k = []
-        numatoms = lattice.numatoms
-        energies = zeros(Float64,numatoms,0)
 
-        for i=1:numlines
-            kmin = klines.kpoints[i].kmin
-            kmax = klines.kpoints[i].kmax
-            nk = klines.kpoints[i].nk
-
-            kmin_real = kmin[:]
-            kmax_real = kmax[:]
-
-            kdistance = sqrt(sum((kmin_real .- kmax_real).^2))
-            vec_k_temp,energies_i = calc_band(kmin_real,kmax_real,nk,lattice,ham)
-            vec_k_i = range(klength,length=nk,stop=klength+kdistance)
-            vec_k = vcat(vec_k,vec_k_i)
-            energies = hcat(energies,energies_i)
-            klength += kdistance
-        end
-        return vec_k,energies
-    end
 
     function test_1D()
         la1 = set_Lattice(1,[[1.0]])
@@ -312,33 +400,35 @@ module TightBinding
         la2 = set_Lattice(2,[a1,a2])
         add_atoms!(la2,[1/3,1/3])
         add_atoms!(la2,[2/3,2/3])
+
         t = 1.0
         add_hoppings!(la2,-t,1,2,[1/3,1/3])
         add_hoppings!(la2,-t,1,2,[-2/3,1/3])
         add_hoppings!(la2,-t,1,2,[1/3,-2/3])
-        ham2 = hamiltonian_k(la2)
+
+        pls = plot_lattice_2d(la2)
+        #return pls
 
         klines = set_Klines()
         kmin = [0,0]
         kmax = [2π/sqrt(3),0]
         nk = 20
-        add_Kpoints!(klines,kmin,kmax,nk)
+        add_Kpoints!(klines,kmin,kmax,nk,"G")
 
         kmin = [2π/sqrt(3),0]
         kmax = [2π/sqrt(3),2π/3]
         nk = 20
-        add_Kpoints!(klines,kmin,kmax,nk)
+        add_Kpoints!(klines,kmin,kmax,nk,"K")
 
         kmin = [2π/sqrt(3),2π/3]
         kmax = [0,0]
         nk = 20
-        add_Kpoints!(klines,kmin,kmax,nk)
+        add_Kpoints!(klines,kmin,kmax,nk,"M")
 
-        vec_k,energies = calc_band_plot(klines,la2,ham2)
+        pls2 = calc_band_plot(klines,la2)
         #println(energies)
+        return pls2
 
-        #pls = plot(vec_k[:],[energies[1,:],energies[2,:]],marker=:circle,label=["1","2"])
-        #savefig("2Denergy_graphene.png")
 
     end
 
