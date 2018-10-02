@@ -205,7 +205,9 @@ module TightBinding
     using .plotfuncs
     using LinearAlgebra
     export set_Lattice,add_atoms!,add_hoppings!,add_diagonals!,hamiltonian_k,
-    dispersion,get_position,calc_band,get_position_kspace,hamiltonian_k_1d
+    dispersion,get_position,calc_band,get_position_kspace,hamiltonian_k_1d,
+    set_Klines,show_neighbers,add_Kpoints!,calc_band_plot,plotfuncs,
+    plot_lattice_2d,calc_band_plot_finite
 
     struct Hopping
         amplitude
@@ -666,7 +668,7 @@ module TightBinding
         add_hoppings!(la2,-t,1,2,[-2/3,1/3])
         add_hoppings!(la2,-t,1,2,[1/3,-2/3])
 
-        get_hopindex(la2)
+
         klines = set_Klines()
         kmin = [-π]
         kmax = [π]
