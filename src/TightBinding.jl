@@ -68,7 +68,7 @@ module TightBinding
 
             for i=1:numlines
                 push!(xticks_values,klength)
-                push!(xticks_labels,klines.kpoints[i].name)
+                push!(xticks_labels,klines.kpoints[i].name_start)
                 kmin = klines.kpoints[i].kmin
                 kmax = klines.kpoints[i].kmax
                 nk = klines.kpoints[i].nk
@@ -83,16 +83,64 @@ module TightBinding
                 vec_k = vcat(vec_k,vec_k_i)
                 energies = hcat(energies,energies_i)
                 klength += kdistance
+                push!(xticks_values,klength)
+                push!(xticks_labels,klines.kpoints[i].name_end)
             end
 
-            pls = plot(vec_k[:],[energies[i,:] for i=1:dim],
+            pls = plot(vec_k[:],[energies[i,:] for i=1:numatoms],
                             xticks = (xticks_values,xticks_labels))
 
             return pls
         end
 
-        function plot_DOS(lattice)
+        function plot_DOS(lattice,nk,de)
+            dim = lattice.dim
+            ham = hamiltonian_k(lattice)
+            n = lattice.numatoms
 
+            if dim == 1
+                energies = zeros(Float64,nk)
+                dk = norm(lattice.rvectors[1])/(nk-1)
+                for ik = 1:nk
+                    k = (ik-1)*dk
+                end
+            elseif dim == 2
+                energies = zeros(Float64,nk,nk)
+                dk1 = norm(lattice.rvectors[1])/(nk-1)
+                dk2 = norm(lattice.rvectors[2])/(nk-1)
+                for ik1 = 1:nk
+                    k1 = (ik1-1)*dk1
+                    for ik2 = 1:nk
+                        k2 = (ik2-1)*dk2
+                        kx,ky = get_position_kspace(lattice,[k1,k2])
+                        energy = dispersion(dim,n,ham,[kx,ky])
+                        energies[ik1,ik2] = energy
+
+                    end
+                end
+            elseif dim == 3
+                energies = zeros(Float64,nk,nk,nk)
+                dk1 = norm(lattice.rvectors[1])/(nk-1)
+                dk2 = norm(lattice.rvectors[2])/(nk-1)
+                dk3 = norm(lattice.rvectors[3])/(nk-1)
+
+                for ik1 = 1:nk
+                    k1 = (ik1-1)*dk1
+                    for ik2 = 1:nk
+                        k2 = (ik2-1)*dk2
+                        for ik3=1:nk
+                            k3= (ik3-1)*dk3
+                            kx,ky,kz = get_position_kspace(lattice,[k1,k2,k3])
+                            energy = dispersion(dim,n,ham,[kx,ky,kz])
+                            energies[ik1,ik2,ik3] = energy
+                        end
+
+                    end
+                end
+            end
+            pls = histogram(energies)
+
+            return pls
         end
 
     end
@@ -101,7 +149,7 @@ module TightBinding
     using .plotfuncs
     using LinearAlgebra
     export set_Lattice,add_atoms!,add_hoppings!,add_diagonals!,hamiltonian_k,
-    dispersion,get_position,calc_band
+    dispersion,get_position,calc_band,get_position_kspace
 
     struct Hopping
         amplitude
@@ -113,7 +161,8 @@ module TightBinding
         kmin::Array{<:Number,1}
         kmax::Array{<:Number,1}
         nk::Int8
-        name
+        name_start
+        name_end
     end
 
     mutable struct Klines
@@ -127,8 +176,8 @@ module TightBinding
         return klines
     end
 
-    function add_Kpoints!(klines,kmin,kmax,nk,name)
-        kpoint = Kpoints(kmin,kmax,nk,name)
+    function add_Kpoints!(klines,kmin,kmax,name_start,name_end;nk=20)
+        kpoint = Kpoints(kmin,kmax,nk,name_start,name_end)
         klines.numlines += 1
         push!(klines.kpoints,kpoint)
     end
@@ -141,7 +190,7 @@ module TightBinding
         numhopps::Int8
         hoppings::Array{Hopping,1}
         diagonals::Array{Float64,1}
-        rvectors::Array{Array{Float64,1},1}
+        rvectors::Array{Array{Float64,1},1} #reciplocal lattice vectors
     end
 
     """
@@ -259,6 +308,15 @@ module TightBinding
         return position
     end
 
+    function get_position_kspace(lattice,vec)
+        position = zeros(Float64,lattice.dim)
+        for i=1:lattice.dim
+            position += vec[i]*lattice.bvectors[i]
+        end
+        return position
+    end
+
+
 
 
 
@@ -337,6 +395,69 @@ module TightBinding
         return vec_k,energies
     end
 
+    function show_neighbers(lattice;maxn = 1,cutoff=2.0)
+        dim = lattice.dim
+        println("Possible hoppings")
+        if dim==1
+            for i1 = -maxn:maxn
+                for i=1:lattice.numatoms
+                    r0 = [i1]
+                    for i=1:lattice.numatoms
+                        ri = lattice.positions[i]
+                        for j=i:lattice.numatoms
+                            rj = lattice.positions[j]+r0
+                            r = rationalize.(rj-ri)
+                            r_pos = get_position(lattice,r)
+                            if norm(r_pos) < cutoff
+                                println("($i,$j), x:$(r[1])")
+                            end
+                        end
+                    end
+                end
+            end
+
+        elseif dim == 2
+            for i1 = -maxn:maxn
+                for i2 = -maxn:maxn
+                    r0 = [i1,i2]
+                    for i=1:lattice.numatoms
+                        ri = lattice.positions[i]
+                        for j=i:lattice.numatoms
+                            rj = lattice.positions[j]+r0
+                            r = rationalize.(rj-ri)
+                            r_pos = get_position(lattice,r)
+                            if norm(r_pos) < cutoff
+                                println("($i,$j), x:$(r[1]), y:$(r[2])")
+                            end
+                        end
+                    end
+                end
+            end
+        elseif dim == 3
+            for i1 = -maxn:maxn
+                for i2 = -maxn:maxn
+                    for i3 = -maxn:maxn
+                        r0 = [i1,i2,i3]
+                        for i=1:lattice.numatoms
+                            ri = lattice.positions[i]
+                            for j=i:lattice.numatoms
+                                rj = lattice.positions[j]+r0
+                                r = rationalize.(rj-ri)
+                                r_pos = get_position(lattice,r)
+                                if norm(r_pos) < cutoff
+                                    println("($i,$j), x:$(r[1]), y:$(r[2]),z:$(r[3])")
+                                end
+                            end
+                        end
+
+                    end
+                end
+            end
+        end
+        return
+
+    end
+
 
 
     function test_1D()
@@ -359,6 +480,9 @@ module TightBinding
     function test_2Dsquare()
         la2 = set_Lattice(2,[[1,0],[0,1]])
         add_atoms!(la2,[0,0])
+
+        show_neighbers(la2)
+
         t = 1.0
         add_hoppings!(la2,-t,1,1,[1,0])
         add_hoppings!(la2,-t,1,1,[0,1])
@@ -374,20 +498,18 @@ module TightBinding
         klines = set_Klines()
         kmin = [0,0]
         kmax = [π,0]
-        nk = 20
-        add_Kpoints!(klines,kmin,kmax,nk)
+        add_Kpoints!(klines,kmin,kmax,"(0,0)","(pi,0)")
 
         kmin = [π,0]
         kmax = [π,π]
-        nk = 20
-        add_Kpoints!(klines,kmin,kmax,nk)
+        add_Kpoints!(klines,kmin,kmax,"(pi,0)","(pi,pi)")
 
         kmin = [π,π]
         kmax = [0,0]
-        nk = 20
-        add_Kpoints!(klines,kmin,kmax,nk)
+        add_Kpoints!(klines,kmin,kmax,"(pi,pi)","(pi,0)")
 
-        vec_k,energies = calc_band_plot(klines,la2,ham2)
+        pls = calc_band_plot(klines,la2)
+        return pls
 
         #pls = plot(vec_k[:],energies[1,:],marker=:circle,label=["2D"])
         #savefig("2Denergy.png")
@@ -401,6 +523,8 @@ module TightBinding
         add_atoms!(la2,[1/3,1/3])
         add_atoms!(la2,[2/3,2/3])
 
+        show_neighbers(la2)
+
         t = 1.0
         add_hoppings!(la2,-t,1,2,[1/3,1/3])
         add_hoppings!(la2,-t,1,2,[-2/3,1/3])
@@ -412,18 +536,18 @@ module TightBinding
         klines = set_Klines()
         kmin = [0,0]
         kmax = [2π/sqrt(3),0]
-        nk = 20
-        add_Kpoints!(klines,kmin,kmax,nk,"G")
+        add_Kpoints!(klines,kmin,kmax,"G","K")
 
         kmin = [2π/sqrt(3),0]
         kmax = [2π/sqrt(3),2π/3]
-        nk = 20
-        add_Kpoints!(klines,kmin,kmax,nk,"K")
+        add_Kpoints!(klines,kmin,kmax,"K","M")
 
         kmin = [2π/sqrt(3),2π/3]
         kmax = [0,0]
-        nk = 20
-        add_Kpoints!(klines,kmin,kmax,nk,"M")
+        add_Kpoints!(klines,kmin,kmax,"M","G")
+
+        #pls = plot_DOS(la2,10,1)
+        #return pls
 
         pls2 = calc_band_plot(klines,la2)
         #println(energies)
