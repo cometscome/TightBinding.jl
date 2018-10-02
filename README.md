@@ -59,7 +59,7 @@ plot_lattice_2d(la)
 ### Graphene nano-ribbon
 
 ```julia
-#We have already constructre atoms and hoppings.
+#We have already constructed atoms and hoppings.
 #We add the line to plot
 klines = set_Klines()
 kmin = [-π]
