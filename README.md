@@ -82,4 +82,4 @@ calc_band_plot_finite(klines,la,direction,periodic=false)
 ```
 
 
-This software is released under the MIT License, see LICENSE.txt.
+This software is released under the MIT License, see LICENSE.
