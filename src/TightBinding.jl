@@ -1,8 +1,9 @@
 module TightBinding
     module plotfuncs
         using Plots
+        using LinearAlgebra
         using ..TightBinding
-        export plot_lattice_2d,calc_band_plot
+        export plot_lattice_2d,calc_band_plot,plot_DOS,calc_band_plot_finite
 
 
         function plot_lattice_2d(lattice)
@@ -93,19 +94,72 @@ module TightBinding
             return pls
         end
 
-        function plot_DOS(lattice,nk,de)
+        function calc_band_plot_finite(klines,lattice,direction;periodic = true,nsites = 20)
+            ham = hamiltonian_k_1d(lattice,direction,periodic=periodic,nsites=nsites)
+            numlines = klines.numlines
+            dim = lattice.dim-1
+            klength = 0.0
+            vec_k = []
+            numatoms = lattice.numatoms
+            N = numatoms*nsites
+            energies = zeros(Float64,0,N)
+            #plot(x,xticks=([4,5],["G","F"]))
+            xticks_values = []
+            xticks_labels = []
+
+            for i=1:numlines
+
+                push!(xticks_values,klength)
+                push!(xticks_labels,klines.kpoints[i].name_start)
+                kmin = klines.kpoints[i].kmin
+                kmax = klines.kpoints[i].kmax
+                nk = klines.kpoints[i].nk
+
+
+                kmin_real = kmin[:]
+                kmax_real = kmax[:]
+
+                kdistance = sqrt(sum((kmin_real .- kmax_real).^2))
+
+                vec_k_temp = zeros(Float64,dim,nk)
+
+                for idim=1:dim
+                    k = range(kmin_real[idim],length=nk,stop=kmax_real[idim])
+                    vec_k_temp[idim,:] = k[:]
+                end
+                energies_i = zeros(Float64,nk,N)
+                for ik=1:nk
+                    energies_i[ik,:] = eigen(ham(vec_k_temp[:,ik])).values[:]
+                end
+
+                vec_k_i = range(klength,length=nk,stop=klength+kdistance)
+                vec_k = vcat(vec_k,vec_k_i)
+                energies = vcat(energies,energies_i)
+                klength += kdistance
+                push!(xticks_values,klength)
+                push!(xticks_labels,klines.kpoints[i].name_end)
+            end
+
+            pls = plot(vec_k[:],energies,
+                            xticks = (xticks_values,xticks_labels),legend=false)
+
+            return pls
+        end
+
+        function plot_DOS(lattice,nk;nbins=100)
             dim = lattice.dim
             ham = hamiltonian_k(lattice)
             n = lattice.numatoms
 
+
             if dim == 1
-                energies = zeros(Float64,nk)
+                energies = zeros(Float64,n,nk)
                 dk = norm(lattice.rvectors[1])/(nk-1)
                 for ik = 1:nk
                     k = (ik-1)*dk
                 end
             elseif dim == 2
-                energies = zeros(Float64,nk,nk)
+                energies = zeros(Float64,n,nk,nk)
                 dk1 = norm(lattice.rvectors[1])/(nk-1)
                 dk2 = norm(lattice.rvectors[2])/(nk-1)
                 for ik1 = 1:nk
@@ -114,7 +168,7 @@ module TightBinding
                         k2 = (ik2-1)*dk2
                         kx,ky = get_position_kspace(lattice,[k1,k2])
                         energy = dispersion(dim,n,ham,[kx,ky])
-                        energies[ik1,ik2] = energy
+                        energies[:,ik1,ik2] = energy[:]
 
                     end
                 end
@@ -132,13 +186,15 @@ module TightBinding
                             k3= (ik3-1)*dk3
                             kx,ky,kz = get_position_kspace(lattice,[k1,k2,k3])
                             energy = dispersion(dim,n,ham,[kx,ky,kz])
-                            energies[ik1,ik2,ik3] = energy
+                            energies[:,ik1,ik2,ik3] = energy[:]
                         end
 
                     end
                 end
             end
-            pls = histogram(energies)
+            energies = vec(energies)
+#            println(energies)
+            pls = histogram(energies,bins=nbins,normalize=true)
 
             return pls
         end
@@ -149,7 +205,7 @@ module TightBinding
     using .plotfuncs
     using LinearAlgebra
     export set_Lattice,add_atoms!,add_hoppings!,add_diagonals!,hamiltonian_k,
-    dispersion,get_position,calc_band,get_position_kspace
+    dispersion,get_position,calc_band,get_position_kspace,hamiltonian_k_1d
 
     struct Hopping
         amplitude
@@ -311,12 +367,91 @@ module TightBinding
     function get_position_kspace(lattice,vec)
         position = zeros(Float64,lattice.dim)
         for i=1:lattice.dim
-            position += vec[i]*lattice.bvectors[i]
+            position += vec[i]*lattice.rvectors[i]
         end
         return position
     end
 
 
+    function get_hopindex(lattice)
+        hopindices = []
+        for ihop=1:lattice.numhopps
+            hopping = lattice.hoppings[ihop]
+            i = hopping.ijatoms[1]
+            ri = lattice.positions[i]
+            rhop = ri+hopping.ijpositions
+            iabhop = round.(Int,rhop).-1
+            #j = hopping.ijatoms[2]
+            push!(hopindices,iabhop)
+        end
+        return hopindices
+    end
+
+    function hamiltonian_k_1d(lattice,direction;nsites = 20,periodic=true)
+        numatoms = lattice.numatoms
+        diagonals = zeros(Float64,numatoms)
+        vectors = lattice.vectors
+        hopindices = get_hopindex(lattice)
+        numhopps = lattice.numhopps
+
+        for i=1:length(lattice.diagonals)
+            diagonals[i] = lattice.diagonals[i]
+        end
+
+        function calc_ham(k)
+            N = numatoms*nsites
+            realpart_ham = zeros(Float64,N,N)
+            imagpart_ham = zeros(Float64,N,N)
+            for isite=1:nsites
+                for i=1:numatoms
+                    ii = (isite-1)*numatoms+i
+                    realpart_ham[ii,ii] = diagonals[i]
+                end
+                for ihop=1:numhopps
+                    δ = hopindices[ihop][direction]
+                    hopping = lattice.hoppings[ihop]
+                    i = hopping.ijatoms[1]
+                    ii = (isite-1)*numatoms+i
+                    jsite = isite + δ
+                    if periodic
+                        while jsite > nsites || jsite < 1
+                            jsite += ifelse(jsite < 1,nsites,0)
+                            jsite += ifelse(jsite > nsites,-nsites,0)
+                        end
+                    end
+                    if 1 <= jsite <= nsites
+                        j= hopping.ijatoms[2]
+                        jj = (jsite-1)*numatoms+j
+
+                        ak = 0.0
+                        ik = 0
+                        hop = hopping.ijpositions
+                        for idim = 1:lattice.dim
+                            if idim != direction
+                                ik += 1
+                                ak += k[ik]*hop[idim]
+                            end
+                        end
+
+                        ampcos = hopping.amplitude*cos(ak)
+                        realpart_ham[ii,jj] +=  ampcos
+                        realpart_ham[jj,ii] +=  ampcos
+                        ampsin = hopping.amplitude*sin(ak)
+                        imagpart_ham[ii,jj] +=  ampsin
+                        imagpart_ham[jj,ii] +=  -ampsin
+
+                    end
+                end
+            end
+            if sum(abs.(imagpart_ham)) == 0.0
+                ham = realpart_ham[:,:]
+            else
+                ham = realpart_ham[:,:]+im*imagpart_ham[:,:]
+            end
+            ham
+        end
+        k -> calc_ham(k)
+    end
 
 
 
@@ -525,10 +660,21 @@ module TightBinding
 
         show_neighbers(la2)
 
+
         t = 1.0
         add_hoppings!(la2,-t,1,2,[1/3,1/3])
         add_hoppings!(la2,-t,1,2,[-2/3,1/3])
         add_hoppings!(la2,-t,1,2,[1/3,-2/3])
+
+        get_hopindex(la2)
+        klines = set_Klines()
+        kmin = [-π]
+        kmax = [π]
+        add_Kpoints!(klines,kmin,kmax,"-pi","pi")
+
+        pls = calc_band_plot_finite(klines,la2,1,periodic=false)
+        return pls
+
 
         pls = plot_lattice_2d(la2)
         #return pls
@@ -546,7 +692,7 @@ module TightBinding
         kmax = [0,0]
         add_Kpoints!(klines,kmin,kmax,"M","G")
 
-        #pls = plot_DOS(la2,10,1)
+        #pls = plot_DOS(la2,100)
         #return pls
 
         pls2 = calc_band_plot(klines,la2)
