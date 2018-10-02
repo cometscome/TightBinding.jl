@@ -14,6 +14,7 @@ There is the sample jupyter notebook.
 Here is a Graphene case
 
 ```julia
+using TightBinding
 #Primitive vectors
 a1 = [sqrt(3)/2,1/2]
 a2= [0,1]
@@ -70,12 +71,12 @@ add_Kpoints!(klines,kmin,kmax,"-pi","pi")
 #We consider the periodic boundary condition along the primitive vector
 direction = 1
 #Periodic boundary condition
-TightBinding.calc_band_plot_finite(klines,la,direction,periodic=true)
+calc_band_plot_finite(klines,la,direction,periodic=true)
 ```
 
 ```julia
 #We introduce the surface perpendicular to the premitive vector
 direction = 1
 #Open boundary condition
-TightBinding.calc_band_plot_finite(klines,la,direction,periodic=false)
+calc_band_plot_finite(klines,la,direction,periodic=false)
 ```
