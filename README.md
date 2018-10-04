@@ -40,7 +40,7 @@ plot_lattice_2d(la)
 ```
 
 ```julia
-# Density of Stats
+# Density of states
 nk = 100 #numer ob meshes. nk^d meshes are used. d is a dimension.
 plot_DOS(la, nk) 
 ```
