@@ -207,7 +207,7 @@ module TightBinding
     export set_Lattice,add_atoms!,add_hoppings!,add_diagonals!,hamiltonian_k,
     dispersion,get_position,calc_band,get_position_kspace,hamiltonian_k_1d,
     set_Klines,show_neighbers,add_Kpoints!,calc_band_plot,plotfuncs,
-    plot_lattice_2d,calc_band_plot_finite
+    plot_lattice_2d,calc_band_plot_finite,plot_DOS
 
     struct Hopping
         amplitude
