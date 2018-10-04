@@ -39,6 +39,13 @@ show_neighbers(la)
 plot_lattice_2d(la)
 ```
 
+#Density of Stats
+
+```julia
+nk = 100 #numer ob meshes. nk^d meshes are used. d is a dimension.
+plot_DOS(la, nk) 
+```
+
 ```julia
 #show the band structure
         klines = set_Klines()
