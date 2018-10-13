@@ -134,12 +134,16 @@ direction = 1
 calc_band_plot_finite(klines,la,direction,periodic=true)
 ```
 
+![68747470733a2f2f71696974612d696d6167652d73746f72652e73332e616d617a6f6e6177732e636f6d2f302f3234363131332f66323033656365632d393835322d303931612d336332382d3662633463386138356666312e706e67](https://user-images.githubusercontent.com/21115243/46902101-315b1a00-cefa-11e8-9e41-01ffe464a3b1.png)
+
+
+
 ```julia
 #We introduce the surface perpendicular to the premitive vector
 direction = 1
 #Open boundary condition
 calc_band_plot_finite(klines,la,direction,periodic=false)
 ```
-
+![68747470733a2f2f71696974612d696d6167652d73746f72652e73332e616d617a6f6e6177732e636f6d2f302f3234363131332f36313038363162632d316538302d343364632d303064322d3035643237663865383435652e706e67](https://user-images.githubusercontent.com/21115243/46902102-34eea100-cefa-11e8-8abf-9216a3163ac4.png)
 
 This software is released under the MIT License, see LICENSE.
