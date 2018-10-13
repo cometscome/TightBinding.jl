@@ -206,7 +206,7 @@ module TightBinding
     using LinearAlgebra
     export set_Lattice,add_atoms!,add_hoppings!,add_diagonals!,hamiltonian_k,
     dispersion,get_position,calc_band,get_position_kspace,hamiltonian_k_1d,
-    set_Klines,show_neighbers,add_Kpoints!,calc_band_plot,plotfuncs,
+    set_Klines,show_neighbors,add_Kpoints!,calc_band_plot,plotfuncs,
     plot_lattice_2d,calc_band_plot_finite,plot_DOS
 
     struct Hopping
@@ -532,7 +532,7 @@ module TightBinding
         return vec_k,energies
     end
 
-    function show_neighbers(lattice;maxn = 1,cutoff=2.0)
+    function show_neighbors(lattice;maxn = 1,cutoff=2.0)
         dim = lattice.dim
         println("Possible hoppings")
         if dim==1
@@ -615,10 +615,12 @@ module TightBinding
     end
 
     function test_2Dsquare()
+        println("Test1: ")
+        println("2D Square lattice with nearest neighbor hoppings")
         la2 = set_Lattice(2,[[1,0],[0,1]])
         add_atoms!(la2,[0,0])
 
-        show_neighbers(la2)
+        show_neighbors(la2)
 
         t = 1.0
         add_hoppings!(la2,-t,1,1,[1,0])
@@ -629,7 +631,9 @@ module TightBinding
         kmax = [0.0,0.0]
         nk = 20
         vec_k,energies = calc_band(kmin,kmax,nk,la2,ham2)
+        println("Energies on the line from (-π,π) to (0,0)")
         println(energies)
+        return energies
 
 
         klines = set_Klines()
@@ -660,7 +664,7 @@ module TightBinding
         add_atoms!(la2,[1/3,1/3])
         add_atoms!(la2,[2/3,2/3])
 
-        show_neighbers(la2)
+        show_neighbors(la2)
 
 
         t = 1.0
