@@ -29,16 +29,56 @@ la = set_Lattice(2,[a1,a2])
 #add atoms
 add_atoms!(la,[1/3,1/3])
 add_atoms!(la,[2/3,2/3])
+```
+Then we added two atoms (atom 1 and atom 2). 
+We can see the possible hoppings.
+
+```julia
 show_neighbors(la)
 ```
 
+Output is
+
+```
+Possible hoppings
+(1,1), x:-1//1, y:-1//1
+(1,2), x:-2//3, y:-2//3
+(2,2), x:-1//1, y:-1//1
+(1,1), x:-1//1, y:0//1
+(1,2), x:-2//3, y:1//3
+(2,2), x:-1//1, y:0//1
+(1,1), x:-1//1, y:1//1
+(1,2), x:-2//3, y:4//3
+(2,2), x:-1//1, y:1//1
+(1,1), x:0//1, y:-1//1
+(1,2), x:1//3, y:-2//3
+(2,2), x:0//1, y:-1//1
+(1,1), x:0//1, y:0//1
+(1,2), x:1//3, y:1//3
+(2,2), x:0//1, y:0//1
+(1,1), x:0//1, y:1//1
+(1,2), x:1//3, y:4//3
+(2,2), x:0//1, y:1//1
+(1,1), x:1//1, y:-1//1
+(1,2), x:4//3, y:-2//3
+(2,2), x:1//1, y:-1//1
+(1,1), x:1//1, y:0//1
+(1,2), x:4//3, y:1//3
+(2,2), x:1//1, y:0//1
+(1,1), x:1//1, y:1//1
+(2,2), x:1//1, y:1//1
+```
+
+If you want to construct the Graphene, you choose hoppings from atom 1 to atom 2: 
+
 ```julia
 #construct hoppings
-        t = 1.0
-        add_hoppings!(la,-t,1,2,[1/3,1/3])
-        add_hoppings!(la,-t,1,2,[-2/3,1/3])
-        add_hoppings!(la,-t,1,2,[1/3,-2/3])
+t = 1.0
+add_hoppings!(la,-t,1,2,[1/3,1/3])
+add_hoppings!(la,-t,1,2,[-2/3,1/3])
+add_hoppings!(la,-t,1,2,[1/3,-2/3])
 ```
+
 
 ```julia
 #show the lattice structure
