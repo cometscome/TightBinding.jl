@@ -85,6 +85,9 @@ add_hoppings!(la,-t,1,2,[1/3,-2/3])
 plot_lattice_2d(la)
 ```
 
+![68747470733a2f2f71696974612d696d6167652d73746f72652e73332e616d617a6f6e6177732e636f6d2f302f3234363131332f37346633306563662d356137632d643337362d393235642d6561663563343634376362632e706e67](https://user-images.githubusercontent.com/21115243/46902071-aa0da680-cef9-11e8-9d4b-3cfa41633dc9.png)
+
+
 ```julia
 # Density of states
 nk = 100 #numer ob meshes. nk^d meshes are used. d is a dimension.
