@@ -80,6 +80,7 @@ module TightBinding
 
                 kdistance = sqrt(sum((kmin_real .- kmax_real).^2))
                 vec_k_temp,energies_i = calc_band(kmin_real,kmax_real,nk,lattice,ham)
+                energies_i = sort(energies_i,dims=1)
                 vec_k_i = range(klength,length=nk,stop=klength+kdistance)
                 vec_k = vcat(vec_k,vec_k_i)
                 energies = hcat(energies,energies_i)
@@ -654,6 +655,58 @@ module TightBinding
 
         #pls = plot(vec_k[:],energies[1,:],marker=:circle,label=["2D"])
         #savefig("2Denergy.png")
+
+    end
+
+    function test_pnictides()
+        la = set_Lattice(2,[[1,0],[0,1]])
+        add_atoms!(la,[0,0])
+        add_atoms!(la,[0,0])
+        t1 = -1.0
+        t2 = 1.3
+        t3 = -0.85
+        t4 = t3
+        μ = 1.45
+
+        #dxz
+        add_hoppings!(la,-t1,1,1,[1,0])
+        add_hoppings!(la,-t2,1,1,[0,1])
+        add_hoppings!(la,-t3,1,1,[1,1])
+        add_hoppings!(la,-t3,1,1,[1,-1])
+
+        #dyz
+        add_hoppings!(la,-t2,2,2,[1,0])
+        add_hoppings!(la,-t1,2,2,[0,1])
+        add_hoppings!(la,-t3,2,2,[1,1])
+        add_hoppings!(la,-t3,2,2,[1,-1])
+
+        #between dxz and dyz
+        add_hoppings!(la,-t4,1,2,[1,1])
+        add_hoppings!(la,-t4,1,2,[-1,-1])
+        add_hoppings!(la,t4,1,2,[1,-1])
+        add_hoppings!(la,t4,1,2,[-1,1])
+
+
+        add_diagonals!(la,[-μ,-μ])
+
+        klines = set_Klines()
+        kmin = [0,0]
+        kmax = [π,0]
+        add_Kpoints!(klines,kmin,kmax,"(0,0)","(pi,0)")
+
+        kmin = [π,0]
+        kmax = [π,π]
+        add_Kpoints!(klines,kmin,kmax,"(pi,0)","(pi,pi)")
+
+        kmin = [π,π]
+        kmax = [0,0]
+        add_Kpoints!(klines,kmin,kmax,"(pi,pi)","(0,0)")
+
+        pls = calc_band_plot(klines,la)
+        savefig("Fe.png")
+        return pls
+
+
 
     end
 

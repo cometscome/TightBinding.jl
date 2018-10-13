@@ -1,14 +1,15 @@
 # TightBinding.jl
-This can construct the tight-binding model and calculate energies in Julia 1.0. 
+This can construct the tight-binding model and calculate energies in Julia 1.0.
+This software is released under the MIT License, see LICENSE.
 
 
-This can 
+This can
 1. construct the Hamiltonian as a functional of a momentum k.
 2. plot the band structure.
 3. show the crystal structure.
 4. plot the band structure of the finite-width system with one surface or boundary.
 
-There is the sample jupyter notebook. 
+There is the sample jupyter notebook.
 
 ## Install
 
@@ -16,7 +17,8 @@ There is the sample jupyter notebook.
 add https://github.com/cometscome/TightBinding.jl
 ```
 
-## sample
+# samples
+## Graphene
 Here is a Graphene case
 
 ```julia
@@ -30,7 +32,7 @@ la = set_Lattice(2,[a1,a2])
 add_atoms!(la,[1/3,1/3])
 add_atoms!(la,[2/3,2/3])
 ```
-Then we added two atoms (atom 1 and atom 2). 
+Then we added two atoms (atom 1 and atom 2).
 We can see the possible hoppings.
 
 ```julia
@@ -69,7 +71,7 @@ Possible hoppings
 (2,2), x:1//1, y:1//1
 ```
 
-If you want to construct the Graphene, you choose hoppings from atom 1 to atom 2: 
+If you want to construct the Graphene, you choose hoppings from atom 1 to atom 2:
 
 ```julia
 #construct hoppings
@@ -91,7 +93,7 @@ plot_lattice_2d(la)
 ```julia
 # Density of states
 nk = 100 #numer ob meshes. nk^d meshes are used. d is a dimension.
-plot_DOS(la, nk) 
+plot_DOS(la, nk)
 ```
 
 ![68747470733a2f2f71696974612d696d6167652d73746f72652e73332e616d617a6f6e6177732e636f6d2f302f3234363131332f39343635643263312d643466332d333634372d363036652d3836626263313462313530622e706e67](https://user-images.githubusercontent.com/21115243/46902081-cc072900-cef9-11e8-8e22-908f91b132a8.png)
@@ -115,8 +117,7 @@ calc_band_plot(klines,la)
 
 ![68747470733a2f2f71696974612d696d6167652d73746f72652e73332e616d617a6f6e6177732e636f6d2f302f3234363131332f32616530653833392d633239642d333166332d336533332d3136343164376431636230382e706e67](https://user-images.githubusercontent.com/21115243/46902092-f22cc900-cef9-11e8-85be-948a0e7d3dae.png)
 
-
-### Graphene nano-ribbon
+## Graphene nano-ribbon
 
 ```julia
 #We have already constructed atoms and hoppings.
@@ -146,4 +147,60 @@ calc_band_plot_finite(klines,la,direction,periodic=false)
 ```
 ![68747470733a2f2f71696974612d696d6167652d73746f72652e73332e616d617a6f6e6177732e636f6d2f302f3234363131332f36313038363162632d316538302d343364632d303064322d3035643237663865383435652e706e67](https://user-images.githubusercontent.com/21115243/46902102-34eea100-cefa-11e8-8abf-9216a3163ac4.png)
 
-This software is released under the MIT License, see LICENSE.
+## Fe-based superconductor
+We construct two-band model for Fe-based superconductor [S. Rachu et al. Phys. Rev. B 77, 220503(R) (2008)].
+
+```Julia
+la = set_Lattice(2,[[1,0],[0,1]]) #Square lattice
+add_atoms!(la,[0,0]) #dxz orbital
+add_atoms!(la,[0,0]) #dyz orbital
+#hoppings
+t1 = -1.0
+t2 = 1.3
+t3 = -0.85
+t4 = t3
+μ = 1.45
+
+#dxz
+add_hoppings!(la,-t1,1,1,[1,0])
+add_hoppings!(la,-t2,1,1,[0,1])
+add_hoppings!(la,-t3,1,1,[1,1])
+add_hoppings!(la,-t3,1,1,[1,-1])
+
+#dyz
+add_hoppings!(la,-t2,2,2,[1,0])
+add_hoppings!(la,-t1,2,2,[0,1])
+add_hoppings!(la,-t3,2,2,[1,1])
+add_hoppings!(la,-t3,2,2,[1,-1])
+
+#between dxz and dyz
+add_hoppings!(la,-t4,1,2,[1,1])
+add_hoppings!(la,-t4,1,2,[-1,-1])
+add_hoppings!(la,t4,1,2,[1,-1])
+add_hoppings!(la,t4,1,2,[-1,1])
+
+#Chemical potentials
+add_diagonals!(la,[-μ,-μ])
+```
+
+To see the band structure, we use
+
+```julia
+klines = set_Klines()
+kmin = [0,0]
+kmax = [π,0]
+add_Kpoints!(klines,kmin,kmax,"(0,0)","(pi,0)")
+
+kmin = [π,0]
+kmax = [π,π]
+add_Kpoints!(klines,kmin,kmax,"(pi,0)","(pi,pi)")
+
+kmin = [π,π]
+kmax = [0,0]
+add_Kpoints!(klines,kmin,kmax,"(pi,pi)","(0,0)")
+
+pls = calc_band_plot(klines,la)
+```
+Then, we have the band structure:
+
+![fe](https://user-images.githubusercontent.com/21115243/46902455-a3cef880-cf00-11e8-97b8-ddb92038ccc1.png)
