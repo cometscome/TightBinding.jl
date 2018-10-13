@@ -98,20 +98,23 @@ plot_DOS(la, nk)
 
 ```julia
 #show the band structure
-        klines = set_Klines()
-        kmin = [0,0]
-        kmax = [2π/sqrt(3),0]
-        add_Kpoints!(klines,kmin,kmax,"G","K")
+klines = set_Klines()
+kmin = [0,0]
+kmax = [2π/sqrt(3),0]
+あdd_Kpoints!(klines,kmin,kmax,"G","K")
 
-        kmin = [2π/sqrt(3),0]
-        kmax = [2π/sqrt(3),2π/3]
-        add_Kpoints!(klines,kmin,kmax,"K","M")
+kmin = [2π/sqrt(3),0]
+kmax = [2π/sqrt(3),2π/3]
+add_Kpoints!(klines,kmin,kmax,"K","M")
 
-        kmin = [2π/sqrt(3),2π/3]
-        kmax = [0,0]
-        add_Kpoints!(klines,kmin,kmax,"M","G")
-        calc_band_plot(klines,la)
+kmin = [2π/sqrt(3),2π/3]
+kmax = [0,0]
+add_Kpoints!(klines,kmin,kmax,"M","G")
+calc_band_plot(klines,la)
 ```
+
+![68747470733a2f2f71696974612d696d6167652d73746f72652e73332e616d617a6f6e6177732e636f6d2f302f3234363131332f32616530653833392d633239642d333166332d336533332d3136343164376431636230382e706e67](https://user-images.githubusercontent.com/21115243/46902092-f22cc900-cef9-11e8-85be-948a0e7d3dae.png)
+
 
 ### Graphene nano-ribbon
 
