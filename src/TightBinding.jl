@@ -689,6 +689,14 @@ module TightBinding
 
         add_diagonals!(la,[-μ,-μ])
 
+
+        ham = hamiltonian_k(la)
+        kx = 0.1
+        ky = 0.2
+        hamk = ham([kx,ky])
+        println(hamk)
+        return
+
         klines = set_Klines()
         kmin = [0,0]
         kmax = [π,0]

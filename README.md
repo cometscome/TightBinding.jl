@@ -204,3 +204,13 @@ pls = calc_band_plot(klines,la)
 Then, we have the band structure:
 
 ![fe](https://user-images.githubusercontent.com/21115243/46902455-a3cef880-cf00-11e8-97b8-ddb92038ccc1.png)
+
+We can obtain the Hamiltonian:
+
+```julia
+ham = hamiltonian_k(la) #we can obtain the function "ham([kx,ky])".
+kx = 0.1
+ky = 0.2
+hamk = ham([kx,ky]) #ham is a functional of k=[kx,ky].
+println(hamk)
+```
