@@ -29,7 +29,7 @@ la = set_Lattice(2,[a1,a2])
 #add atoms
 add_atoms!(la,[1/3,1/3])
 add_atoms!(la,[2/3,2/3])
-show_neighbers(la)
+show_neighbors(la)
 ```
 
 ```julia
