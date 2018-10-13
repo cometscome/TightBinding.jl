@@ -1,6 +1,6 @@
 # TightBinding.jl
-This can construct the tight-binding model and calculate energies. 
-This is not completed, yet.
+This can construct the tight-binding model and calculate energies in Julia 1.0. 
+
 
 This can 
 1. construct the Hamiltonian as a functional of a momentum k.
@@ -9,6 +9,12 @@ This can
 4. plot the band structure of the finite-width system with one surface or boundary.
 
 There is the sample jupyter notebook. 
+
+## Install
+
+```
+add https://github.com/cometscome/TightBinding.jl
+```
 
 ## sample
 Here is a Graphene case
