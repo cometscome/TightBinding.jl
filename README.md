@@ -180,7 +180,7 @@ add_hoppings!(la,t4,1,2,[1,-1])
 add_hoppings!(la,t4,1,2,[-1,1])
 
 #Chemical potentials
-add_diagonals!(la,[-μ,-μ])
+set_μ!(la,μ) #set the chemical potential
 ```
 
 To see the band structure, we use

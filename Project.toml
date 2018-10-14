@@ -1,7 +1,7 @@
 name = "TightBinding"
 uuid = "4482633c-c459-11e8-019e-737cadda7745"
 authors = ["Yuki Nagai <cometscome@gmail.com>"]
-version = "0.1.0"
+version = "0.1.1"
 
 [deps]
 GR = "28b8d3ca-fb5f-59d9-8090-bfdbd6d07a71"
