@@ -353,6 +353,27 @@ set_onsite!(la,onsite)
 set_μ!(la,10.96) #set the chemical potential
 ```
 
+Then, we plot the band structure
+
+```julia
+nk = 100
+klines = set_Klines()
+kmin = [0,0]
+kmax = [π,0]
+add_Kpoints!(klines,kmin,kmax,"(0,0)","(pi,0)",nk=nk)
+
+kmin = [π,0]
+kmax = [π,π]
+add_Kpoints!(klines,kmin,kmax,"(pi,0)","(pi,pi)",nk=nk)
+
+kmin = [π,π]
+kmax = [0,0]
+add_Kpoints!(klines,kmin,kmax,"(pi,pi)","(0,0)",nk=nk)
+
+pls = calc_band_plot(klines,la)
+savefig("Fe5band.png")
+```
+
 We have the band structure:
 
 ![fe5band](https://user-images.githubusercontent.com/21115243/46914868-2f6a8700-cfde-11e8-8f40-a052cd66b473.png)
