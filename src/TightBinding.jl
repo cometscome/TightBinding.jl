@@ -5,10 +5,10 @@ module TightBinding
     using LinearAlgebra
     export set_Lattice,add_atoms!,add_hoppings!,add_diagonals!,hamiltonian_k,
     dispersion,get_position,calc_band,get_position_kspace,hamiltonian_k_1d,
-    set_Klines,show_neighbors,add_Kpoints!
+    set_Klines,show_neighbors,add_Kpoints!,set_onsite!,set_μ!
     #,calc_band_plot,plotfuncs,
     #plot_lattice_2d,calc_band_plot_finite,plot_DOS
-    export plotfuncs,plot_lattice_2d,calc_band_plot,plot_DOS,calc_band_plot_finite #From Plotfuncs.jl
+    export Plotfuncs,plot_lattice_2d,calc_band_plot,plot_DOS,calc_band_plot_finite #From Plotfuncs.jl
 
     struct Hopping
         amplitude
@@ -19,7 +19,7 @@ module TightBinding
     struct Kpoints
         kmin::Array{<:Number,1}
         kmax::Array{<:Number,1}
-        nk::Int8
+        nk::Int64
         name_start
         name_end
     end
@@ -44,9 +44,9 @@ module TightBinding
     mutable struct Lattice
         dim::Int8
         vectors::Array{Array{Float64,1},1}
-        numatoms::Int8
+        numatoms::Int64
         positions::Array{Array{Float64,1},1}
-        numhopps::Int8
+        numhopps::Int64
         hoppings::Array{Hopping,1}
         diagonals::Array{Float64,1}
         rvectors::Array{Array{Float64,1},1} #reciplocal lattice vectors
@@ -143,8 +143,12 @@ module TightBinding
         end
     end
 
-    function set_μ!(la,μ)
-        la.μ = μ
+    function set_μ!(lattice,μ)
+        lattice.μ = μ
+    end
+
+    function set_onsite!(lattice,onsite::Array{<:Number,1})
+        lattice.diagonals = onsite[:]
     end
 
 

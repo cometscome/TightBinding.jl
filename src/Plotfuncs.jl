@@ -3,6 +3,7 @@ module Plotfuncs
     using LinearAlgebra
     using ..TightBinding
     export plot_lattice_2d,calc_band_plot,plot_DOS,calc_band_plot_finite
+    export plot_fermisurface_2D
 
 
     function plot_lattice_2d(lattice)
@@ -51,6 +52,64 @@ module Plotfuncs
             end
         end
         plot!(aspect_ratio=:equal)
+        return pls
+    end
+
+    """
+        plot_fermisurface_2D(lattice::Lattice;Eshift = 0.0,nk = 20)
+
+    Show the Fermi surface for 2D system. \\
+    This plots the contour with E=0.0+Eshift \\
+    Eshift: the energy shift from the chemical potential lattice.μ \\
+    nk: the number of meshes in 2D momentum space. The total mesh is nk x nk.
+    """
+    function plot_fermisurface_2D(lattice;Eshift = 0.0,nk = 50)
+        ham = hamiltonian_k(lattice) #Construct the Hamiltonian
+        dim = lattice.dim
+        n = lattice.numatoms
+
+        if dim != 2
+            println("This function only supports 2D case. lattice.dim should be 2. But dim = $dim .")
+            return
+        end
+
+        k1s = range(-0.51, stop = 0.51, length = nk)
+        k2s = range(-0.51, stop = 0.51, length = nk)
+        kx_vec = zeros(Float64,nk)
+        ky_vec = zeros(Float64,nk)
+        energies = zeros(Float64,n,nk,nk)
+        colors = ["red","blue","orange","brown","yellow"]
+        kxmin,kymin = get_position_kspace(lattice,[-0.5,-0.5])
+        kxmax,kymax = get_position_kspace(lattice,[0.5,0.5])
+
+        for i1=1:nk
+            for i2=1:nk
+                kx,ky = get_position_kspace(lattice,[k1s[i1],k2s[i2]])
+                kx_vec[i1] = kx
+                ky_vec[i2] = ky
+                energy = dispersion(dim,n,ham,[kx,ky])
+                for j=1:n
+                    energies[j,i1,i2] = energy[j]
+                end
+
+            end
+        end
+#        println("energies ",energies[1,:,:])
+        #println(kx_vec)
+        i = 1
+        pls = contour(kx_vec,ky_vec,energies[i,:,:],levels=[Eshift],
+            xlabel="kx",ylabel="ky",aspect_ratio=1,
+            xlims=(kxmin,kxmax),ylims=(kymin,kymax)
+            )
+        for i=2:n
+            pls = contour!(kx_vec,ky_vec,energies[i,:,:],levels=[Eshift],
+                xlabel="kx",ylabel="ky",aspect_ratio=1,
+                xlims=(kxmin,kxmax),ylims=(kymin,kymax)
+                )
+        end
+        return pls
+
+
         return pls
     end
 
@@ -154,14 +213,14 @@ module Plotfuncs
 
         if dim == 1
             energies = zeros(Float64,n,nk)
-            dk = norm(lattice.rvectors[1])/(nk-1)
+            dk = 1/(nk-1)
             for ik = 1:nk
                 k = (ik-1)*dk
             end
         elseif dim == 2
             energies = zeros(Float64,n,nk,nk)
-            dk1 = norm(lattice.rvectors[1])/(nk-1)
-            dk2 = norm(lattice.rvectors[2])/(nk-1)
+            dk1 = 1/(nk-1)
+            dk2 = 1/(nk-1)
             for ik1 = 1:nk
                 k1 = (ik1-1)*dk1
                 for ik2 = 1:nk
@@ -174,9 +233,9 @@ module Plotfuncs
             end
         elseif dim == 3
             energies = zeros(Float64,nk,nk,nk)
-            dk1 = norm(lattice.rvectors[1])/(nk-1)
-            dk2 = norm(lattice.rvectors[2])/(nk-1)
-            dk3 = norm(lattice.rvectors[3])/(nk-1)
+            dk1 = 1/(nk-1)
+            dk2 = 1/(nk-1)
+            dk3 = 1/(nk-1)
 
             for ik1 = 1:nk
                 k1 = (ik1-1)*dk1
