@@ -103,7 +103,7 @@ plot_DOS(la, nk)
 klines = set_Klines()
 kmin = [0,0]
 kmax = [2π/sqrt(3),0]
-あdd_Kpoints!(klines,kmin,kmax,"G","K")
+add_Kpoints!(klines,kmin,kmax,"G","K")
 
 kmin = [2π/sqrt(3),0]
 kmax = [2π/sqrt(3),2π/3]
