@@ -409,7 +409,7 @@ Then,
 ```julia
 hamiltonian = surfaceHamiltonian(Hk,3,norb,L=32,kpara="kx",BC="OBC")
 ```
-makes the function ```hamiltonian(k)'''. We can choose open boundary condition OBC or 
+makes the function hamiltonian(k). We can choose open boundary condition OBC or 
 periodic boundary condition PBC.
 
 ```julia
@@ -430,5 +430,6 @@ plot(kxs,mat_e,labels="")
 savefig("tes1.png")
 ```
 You can see the surface state. 
+
 ![tes2](https://user-images.githubusercontent.com/21115243/52520885-38304880-2cb2-11e9-9aba-3654fa48a85d.png)
 
