@@ -13,7 +13,7 @@ This can
 There is the sample jupyter notebook.
 
 ## Install
-
+Push "]" to enter the package mode.
 ```
 add https://github.com/cometscome/TightBinding.jl
 ```
