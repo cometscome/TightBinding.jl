@@ -408,10 +408,12 @@ Now, when you use TightBinding.jl, the Pauli matrices σx,σy,σz,σ0 are define
 Then, 
 
 ```julia
-hamiltonian = surfaceHamiltonian(Hk,3,norb,L=32,kpara="kx",BC="OBC")
+hamiltonian = surfaceHamiltonian(Hk,norb,numhop=3,L=32,kpara="kx",BC="OBC")
 ```
 makes the function hamiltonian(k). We can choose open boundary condition OBC or 
 periodic boundary condition PBC.
+numhop determines the number of the maximum hoppings. numhop-th nearest neighbor hopping can be included.
+L detemines the size of the real space lattice. 
 
 ```julia
 using Plots
@@ -424,7 +426,7 @@ for i=1:nkx
     #println(mat_h)
     
     e,v = eigen(Matrix(mat_h))
-    println(e)
+    #println(e)
     mat_e[i,:] = real.(e[:])
 end
 plot(kxs,mat_e,labels="")
