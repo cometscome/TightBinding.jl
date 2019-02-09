@@ -402,6 +402,7 @@ m2y = m2x
 m0 = -2*m2x
 m(k) = m0 + 2m2x*(1-cos(k[1]))+2m2y*(1-cos(k[2]))
 Hk(k) = Ax*sin(k[1]).*σx +  Ay*sin(k[2]).*σy + m(k).*σz
+norb = 2 #The size of the matrix
 ```
 Now, when you use TightBinding.jl, the Pauli matrices σx,σy,σz,σ0 are defined.
 Then, 
