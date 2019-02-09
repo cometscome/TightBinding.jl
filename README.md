@@ -430,4 +430,5 @@ plot(kxs,mat_e,labels="")
 savefig("tes1.png")
 ```
 You can see the surface state. 
+![tes2](https://user-images.githubusercontent.com/21115243/52520885-38304880-2cb2-11e9-9aba-3654fa48a85d.png)
 
