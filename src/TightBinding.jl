@@ -1,7 +1,9 @@
 module TightBinding
     include("./Plotfuncs.jl")
+    include("./TBfromk2r.jl")
     using Plots
     using .Plotfuncs
+    using .TBfromk2r
     using LinearAlgebra
     export set_Lattice,add_atoms!,add_hoppings!,add_diagonals!,hamiltonian_k,
     dispersion,get_position,calc_band,get_position_kspace,hamiltonian_k_1d,
@@ -9,6 +11,7 @@ module TightBinding
     #,calc_band_plot,plotfuncs,
     #plot_lattice_2d,calc_band_plot_finite,plot_DOS
     export Plotfuncs,plot_lattice_2d,calc_band_plot,plot_DOS,calc_band_plot_finite #From Plotfuncs.jl
+    export surfaceHamiltonian,σx,σy,σz,σ0
 
     struct Hopping
         amplitude

@@ -8,6 +8,7 @@ This can
 2. plot the band structure.
 3. show the crystal structure.
 4. plot the band structure of the finite-width system with one surface or boundary.
+5. [09 Feb. 2019] make surface Hamiltonian from the momentum space Hamiltonian.
 
 There is the sample jupyter notebook.
 
@@ -387,3 +388,46 @@ pls = plot_fermisurface_2D(la)
 ```
 
 ![fefermi](https://user-images.githubusercontent.com/21115243/46914887-b28bdd00-cfde-11e8-9021-16077f960ad5.png)
+
+# [09 Feb. 2019] Making surface Hamiltonian from the momentum space Hamiltonian
+If we have the Hamiltonian defined in momentum space, we can construct the surface Hamiltonian.
+For example, we consider a model of 2D topological insulator: 
+
+```julia
+using TightBinding
+Ax = 1
+Ay = 1
+m2x = 1
+m2y = m2x
+m0 = -2*m2x
+m(k) = m0 + 2m2x*(1-cos(k[1]))+2m2y*(1-cos(k[2]))
+Hk(k) = Ax*sin(k[1]).*σx +  Ay*sin(k[2]).*σy + m(k).*σz
+```
+Now, when you use TightBinding.jl, the Pauli matrices σx,σy,σz,σ0 are defined.
+Then, 
+
+```julia
+hamiltonian = surfaceHamiltonian(Hk,3,norb,L=32,kpara="kx",BC="OBC")
+```
+makes the function ```hamiltonian(k)'''. We can choose open boundary condition OBC or 
+periodic boundary condition PBC.
+
+```julia
+using Plots
+nkx = 100
+kxs = range(-π,stop=π ,length=nkx)
+mat_e = zeros(Float64,nkx,32*2)
+for i=1:nkx
+    kx = kxs[i]
+    mat_h = hamiltonian(kx)
+    #println(mat_h)
+    
+    e,v = eigen(Matrix(mat_h))
+    println(e)
+    mat_e[i,:] = real.(e[:])
+end
+plot(kxs,mat_e,labels="")
+savefig("tes1.png")
+```
+You can see the surface state. 
+
