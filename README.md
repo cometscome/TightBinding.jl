@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/cometscome/TightBinding.jl.svg?branch=master)](https://travis-ci.org/cometscome/TightBinding.jl)
+
 # TightBinding.jl
 This can construct the tight-binding model and calculate energies in Julia 1.0.
 This software is released under the MIT License, see LICENSE.
