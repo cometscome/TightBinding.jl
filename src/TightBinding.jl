@@ -12,6 +12,7 @@ module TightBinding
     #plot_lattice_2d,calc_band_plot_finite,plot_DOS
     export Plotfuncs,plot_lattice_2d,calc_band_plot,plot_DOS,calc_band_plot_finite #From Plotfuncs.jl
     export surfaceHamiltonian,σx,σy,σz,σ0
+    export plot_fermisurface_2D
 
     struct Hopping
         amplitude
