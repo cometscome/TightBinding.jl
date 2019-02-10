@@ -417,6 +417,7 @@ L detemines the size of the real space lattice.
 
 ```julia
 using Plots
+using LinearAlgebra
 nkx = 100
 kxs = range(-π,stop=π ,length=nkx)
 mat_e = zeros(Float64,nkx,32*2)
