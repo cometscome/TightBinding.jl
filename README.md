@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/cometscome/TightBinding.jl.svg?branch=master)](https://travis-ci.org/cometscome/TightBinding.jl)
+[![Coverage Status](https://coveralls.io/repos/github/cometscome/TightBinding.jl/badge.svg?branch=master)](https://coveralls.io/github/cometscome/TightBinding.jl?branch=master)
 
 # TightBinding.jl
 This can construct the tight-binding model and calculate energies in Julia 1.0.
