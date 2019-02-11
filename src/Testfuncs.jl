@@ -9,6 +9,7 @@ function test_1D()
     nk = 20
     vec_k,energies = calc_band(kmin,kmax,nk,la1,ham1)
     println(energies)
+    return energies
 
     pls = plot(vec_k[1,:],energies[1,:],marker=:circle,label=["1D"])
     savefig("1Denergy.png")
@@ -92,7 +93,7 @@ function test_pnictides()
 
 
     pls = plot_fermisurface_2D(la)
-    return pls
+    #return pls
 
     klines = set_Klines()
     kmin = [0,0]
@@ -108,15 +109,15 @@ function test_pnictides()
     add_Kpoints!(klines,kmin,kmax,"(pi,pi)","(0,0)")
 
     pls = calc_band_plot(klines,la)
-    savefig("Fe.png")
-    return pls
+    #savefig("Fe.png")
+    #return pls
 
     ham = hamiltonian_k(la)
     kx = 0.1
     ky = 0.2
     hamk = ham([kx,ky])
-    println(hamk)
-    return
+    #println(hamk)
+    return hamk
 
 end
 
@@ -279,15 +280,15 @@ function test_pnictides_5orbitals()
     add_Kpoints!(klines,kmin,kmax,"(pi,pi)","(0,0)",nk=nk)
 
     pls = calc_band_plot(klines,la)
-    savefig("Fe5band.png")
-    return pls
+    #savefig("Fe5band.png")
+    #return pls
 
     ham = hamiltonian_k(la)
     kx = 0.1
     ky = 0.2
     hamk = ham([kx,ky])
-    println(hamk)
-    return
+    #println(hamk)
+    return hamk
 
 end
 
@@ -313,7 +314,7 @@ function test_2DGraphene()
     add_Kpoints!(klines,kmin,kmax,"-pi","pi")
 
     pls = calc_band_plot_finite(klines,la2,1,periodic=false)
-    return pls
+    #return pls
 
 
     pls = plot_lattice_2d(la2)
@@ -336,8 +337,46 @@ function test_2DGraphene()
     #return pls
 
     pls2 = calc_band_plot(klines,la2)
-    #println(energies)
-    return pls2
+
+    ham = hamiltonian_k(la2)
+    kx = 0.1
+    ky = 0.2
+    hamk = ham([kx,ky])
+    println(hamk)
+    return hamk
 
 
+end
+
+
+function test_surface()
+    Ax = 1
+    Ay = 1
+    m2x = 1
+    m2y = m2x
+    m0 = -2*m2x
+    m(k) = m0 + 2m2x*(1-cos(k[1]))+2m2y*(1-cos(k[2]))
+    Hk(k) = Ax*sin(k[1]).*σx +  Ay*sin(k[2]).*σy + m(k).*σz
+    norb = 2 #The size of the matrix
+    hamiltonian = surfaceHamiltonian(Hk,norb,numhop=3,L=32,kpara="kx",BC="OBC")
+
+    nkx = 100
+    kxs = range(-π,stop=π ,length=nkx)
+    mat_e = zeros(Float64,nkx,32*2)
+    for i=1:nkx
+        kx = kxs[i]
+        mat_h = hamiltonian(kx)
+    #println(mat_h)
+    
+        e,v = eigen(Matrix(mat_h))
+        #println(e)
+        mat_e[i,:] = real.(e[:])
+    end
+    
+    plot(kxs,mat_e,labels="")
+    return mat_e
+    
+    #
+    
+    return
 end
