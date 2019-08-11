@@ -158,7 +158,7 @@ module Plotfuncs
         numlines = klines.numlines
         dim = lattice.dim-1
         klength = 0.0
-        vec_k = []
+        vec_k = Float64[]
         numatoms = lattice.numatoms
         N = numatoms*nsites
         energies = zeros(Float64,0,N)
