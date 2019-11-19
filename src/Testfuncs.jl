@@ -333,6 +333,9 @@ function test_2DGraphene()
     kmax = [0,0]
     add_Kpoints!(klines,kmin,kmax,"M","G")
 
+    println("Get DOS data...")
+    hist = get_DOS(la2,100)
+    println("Done.")
     #pls = plot_DOS(la2,100)
     #return pls
 
@@ -347,6 +350,7 @@ function test_2DGraphene()
 
 
 end
+
 
 
 function test_surface()

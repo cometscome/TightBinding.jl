@@ -12,6 +12,7 @@ This can
 3. show the crystal structure.
 4. plot the band structure of the finite-width system with one surface or boundary.
 5. [09 Feb. 2019] make surface Hamiltonian from the momentum space Hamiltonian.
+6. [19 Nov. 2019] get DOS data and energy mesh
 
 There is the sample jupyter notebook.
 
@@ -101,6 +102,21 @@ plot_DOS(la, nk)
 ```
 
 ![68747470733a2f2f71696974612d696d6167652d73746f72652e73332e616d617a6f6e6177732e636f6d2f302f3234363131332f39343635643263312d643466332d333634372d363036652d3836626263313462313530622e706e67](https://user-images.githubusercontent.com/21115243/46902081-cc072900-cef9-11e8-8e22-908f91b132a8.png)
+
+[19 Nov. 2019]  We can get DOS data and energy mesh. 
+
+```julia
+nk = 100 #numer ob meshes. nk^d meshes are used. d is a dimension.
+hist = get_DOS(la, nk)
+println(hist.weights) #DOS data
+println(hist.edges[1]) #energy mesh
+using Plots
+plot(hist.edges[1][2:end] .- hist.edges[1].step.hi/2,hist.weights)
+```
+
+
+
+
 
 ```julia
 #show the band structure
