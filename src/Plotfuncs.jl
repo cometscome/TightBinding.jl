@@ -1,8 +1,8 @@
-module Plotfuncs
-    using Plots
+#module Plotfuncs
+    using .Plots
     using LinearAlgebra
     using StatsBase
-    using ..TightBinding
+    #using ..TightBinding
     export plot_lattice_2d,calc_band_plot,plot_DOS,calc_band_plot_finite
     export plot_fermisurface_2D
     export get_DOS
@@ -206,59 +206,6 @@ module Plotfuncs
         return pls
     end
 
-    function get_DOS(lattice,nk;nbins=100)
-        dim = lattice.dim
-        ham = hamiltonian_k(lattice)
-        n = lattice.numatoms
-
-
-        if dim == 1
-            energies = zeros(Float64,n,nk)
-            dk = 1/(nk-1)
-            for ik = 1:nk
-                k = (ik-1)*dk
-            end
-        elseif dim == 2
-            energies = zeros(Float64,n,nk,nk)
-            dk1 = 1/(nk-1)
-            dk2 = 1/(nk-1)
-            for ik1 = 1:nk
-                k1 = (ik1-1)*dk1
-                for ik2 = 1:nk
-                    k2 = (ik2-1)*dk2
-                    kx,ky = get_position_kspace(lattice,[k1,k2])
-                    energy = dispersion(dim,n,ham,[kx,ky])
-                    energies[:,ik1,ik2] = energy[:]
-
-                end
-            end
-        elseif dim == 3
-            energies = zeros(Float64,nk,nk,nk)
-            dk1 = 1/(nk-1)
-            dk2 = 1/(nk-1)
-            dk3 = 1/(nk-1)
-
-            for ik1 = 1:nk
-                k1 = (ik1-1)*dk1
-                for ik2 = 1:nk
-                    k2 = (ik2-1)*dk2
-                    for ik3=1:nk
-                        k3= (ik3-1)*dk3
-                        kx,ky,kz = get_position_kspace(lattice,[k1,k2,k3])
-                        energy = dispersion(dim,n,ham,[kx,ky,kz])
-                        energies[:,ik1,ik2,ik3] = energy[:]
-                    end
-
-                end
-            end
-        end
-        energies = vec(energies)
-#            println(energies)
-        #pls = histogram(energies,bins=nbins,normalize=true)
-        hist = fit(Histogram,energies,nbins=nbins)
-
-        return hist
-    end        
 
     function plot_DOS(lattice,nk;nbins=100)
         dim = lattice.dim
@@ -320,4 +267,4 @@ module Plotfuncs
         =#
     end
 
-end
+#end

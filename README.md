@@ -88,6 +88,7 @@ add_hoppings!(la,-t,1,2,[1/3,-2/3])
 
 
 ```julia
+using Plots
 #show the lattice structure
 plot_lattice_2d(la)
 ```
@@ -96,6 +97,7 @@ plot_lattice_2d(la)
 
 
 ```julia
+using Plots
 # Density of states
 nk = 100 #numer ob meshes. nk^d meshes are used. d is a dimension.
 plot_DOS(la, nk)
@@ -140,6 +142,7 @@ calc_band_plot(klines,la)
 ## Graphene nano-ribbon
 
 ```julia
+using Plots
 #We have already constructed atoms and hoppings.
 #We add the line to plot
 klines = set_Klines()
@@ -219,6 +222,7 @@ kmin = [π,π]
 kmax = [0,0]
 add_Kpoints!(klines,kmin,kmax,"(pi,pi)","(0,0)")
 
+using Plots
 pls = calc_band_plot(klines,la)
 ```
 Then, we have the band structure:
@@ -390,6 +394,7 @@ kmin = [π,π]
 kmax = [0,0]
 add_Kpoints!(klines,kmin,kmax,"(pi,pi)","(0,0)",nk=nk)
 
+using Plots
 pls = calc_band_plot(klines,la)
 savefig("Fe5band.png")
 ```

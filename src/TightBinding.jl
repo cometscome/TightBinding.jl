@@ -1,18 +1,19 @@
 module TightBinding
-    include("./Plotfuncs.jl")
+    
     include("./TBfromk2r.jl")
-    using Plots
-    using .Plotfuncs
+    #using Plots
+    #using .Plotfuncs
     using .TBfromk2r
     using LinearAlgebra
+    using Requires
     export set_Lattice,add_atoms!,add_hoppings!,add_diagonals!,hamiltonian_k,
     dispersion,get_position,calc_band,get_position_kspace,hamiltonian_k_1d,
     set_Klines,show_neighbors,add_Kpoints!,set_onsite!,set_μ!
     #,calc_band_plot,plotfuncs,
     #plot_lattice_2d,calc_band_plot_finite,plot_DOS
-    export Plotfuncs,plot_lattice_2d,calc_band_plot,plot_DOS,calc_band_plot_finite #From Plotfuncs.jl
+    
     export surfaceHamiltonian,σx,σy,σz,σ0
-    export plot_fermisurface_2D,get_DOS
+    export get_DOS
 
     struct Hopping
         amplitude
@@ -31,6 +32,14 @@ module TightBinding
     mutable struct Klines
         numlines::Int64
         kpoints::Array{Kpoints,1}
+    end
+
+    function __init__()
+        @require Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80" begin 
+            include("./Plotfuncs.jl")
+            export Plotfuncs,plot_lattice_2d,calc_band_plot,plot_DOS,calc_band_plot_finite #From Plotfuncs.jl
+            export plot_fermisurface_2D
+        end
     end
 
     function set_Klines()
@@ -412,6 +421,61 @@ module TightBinding
         return
 
     end
+
+
+    function get_DOS(lattice,nk;nbins=100)
+        dim = lattice.dim
+        ham = hamiltonian_k(lattice)
+        n = lattice.numatoms
+
+
+        if dim == 1
+            energies = zeros(Float64,n,nk)
+            dk = 1/(nk-1)
+            for ik = 1:nk
+                k = (ik-1)*dk
+            end
+        elseif dim == 2
+            energies = zeros(Float64,n,nk,nk)
+            dk1 = 1/(nk-1)
+            dk2 = 1/(nk-1)
+            for ik1 = 1:nk
+                k1 = (ik1-1)*dk1
+                for ik2 = 1:nk
+                    k2 = (ik2-1)*dk2
+                    kx,ky = get_position_kspace(lattice,[k1,k2])
+                    energy = dispersion(dim,n,ham,[kx,ky])
+                    energies[:,ik1,ik2] = energy[:]
+
+                end
+            end
+        elseif dim == 3
+            energies = zeros(Float64,nk,nk,nk)
+            dk1 = 1/(nk-1)
+            dk2 = 1/(nk-1)
+            dk3 = 1/(nk-1)
+
+            for ik1 = 1:nk
+                k1 = (ik1-1)*dk1
+                for ik2 = 1:nk
+                    k2 = (ik2-1)*dk2
+                    for ik3=1:nk
+                        k3= (ik3-1)*dk3
+                        kx,ky,kz = get_position_kspace(lattice,[k1,k2,k3])
+                        energy = dispersion(dim,n,ham,[kx,ky,kz])
+                        energies[:,ik1,ik2,ik3] = energy[:]
+                    end
+
+                end
+            end
+        end
+        energies = vec(energies)
+#            println(energies)
+        #pls = histogram(energies,bins=nbins,normalize=true)
+        hist = fit(Histogram,energies,nbins=nbins)
+
+        return hist
+    end        
 
 
 
