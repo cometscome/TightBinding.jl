@@ -205,57 +205,40 @@ module Plotfuncs
         return pls
     end
 
-    function plot_DOS(lattice,nk;nbins=100)
-        dim = lattice.dim
-        ham = hamiltonian_k(lattice)
-        n = lattice.numatoms
+    function get_DOS(Lattice::Lattice; nk = 100, window = [-8.,8.], nw = 150)
+        dim = Lattice.dim
+        n   = Lattice.numatoms
+        H   = hamiltonian_k(Lattice)
 
+        energies = []
+        kmesh = LinRange(0,1,nk)
 
         if dim == 1
-            energies = zeros(Float64,n,nk)
-            dk = 1/(nk-1)
-            for ik = 1:nk
-                k = (ik-1)*dk
+            @inbounds for i in 1:nk
+                kx = get_position_kspace(Lattice,[kmesh[i]])
+                energy = dispersion(dim,n,H,[kx])
+                append!(energies,energy)
             end
         elseif dim == 2
-            energies = zeros(Float64,n,nk,nk)
-            dk1 = 1/(nk-1)
-            dk2 = 1/(nk-1)
-            for ik1 = 1:nk
-                k1 = (ik1-1)*dk1
-                for ik2 = 1:nk
-                    k2 = (ik2-1)*dk2
-                    kx,ky = get_position_kspace(lattice,[k1,k2])
-                    energy = dispersion(dim,n,ham,[kx,ky])
-                    energies[:,ik1,ik2] = energy[:]
-
-                end
+            @inbounds for i in 1:nk, j in 1:nk
+                kx,ky = get_position_kspace(Lattice,[kmesh[i],kmesh[j]])
+                energy = dispersion(dim,n,H,[kx,ky])
+                append!(energies,energy)
             end
         elseif dim == 3
-            energies = zeros(Float64,nk,nk,nk)
-            dk1 = 1/(nk-1)
-            dk2 = 1/(nk-1)
-            dk3 = 1/(nk-1)
-
-            for ik1 = 1:nk
-                k1 = (ik1-1)*dk1
-                for ik2 = 1:nk
-                    k2 = (ik2-1)*dk2
-                    for ik3=1:nk
-                        k3= (ik3-1)*dk3
-                        kx,ky,kz = get_position_kspace(lattice,[k1,k2,k3])
-                        energy = dispersion(dim,n,ham,[kx,ky,kz])
-                        energies[:,ik1,ik2,ik3] = energy[:]
-                    end
-
-                end
+            @inbounds for i in 1:nk, j in 1:nk, k in 1:nk
+                kx,ky,kz = get_position_kspace(Lattice,[kmesh[i],kmesh[j],kmesh[k]])
+                energy = dispersion(dim,n,H,[kx,ky,kz])
+                append!(energies,energy)
             end
         end
-        energies = vec(energies)
-#            println(energies)
-        pls = histogram(energies,bins=nbins,normalize=true)
 
-        return pls
+        wmesh = collect(LinRange(window[1],window[2],nw))
+        w = 0.5*(wmesh[1:end-1] + wmesh[2:end])
+        hist = fit(Histogram,energies,wmesh)
+        dos = hist.weights / (length(energies))
+
+        return w,dos
     end
 
 end
