@@ -14,6 +14,7 @@ This can
 5. [09 Feb. 2019] make surface Hamiltonian from the momentum space Hamiltonian.
 6. [19 Nov. 2019] get DOS data and energy mesh
 7. [22 Jun. 2020] construct a supercell model
+8. [EXPERIMENTAL][22 Jun. 2020] write Wannier90 format.
 
 There is the sample jupyter notebook.
 
@@ -512,3 +513,40 @@ plot_DOS(la_2x2, nk)
 ```
 
 ![2x2dos](https://user-images.githubusercontent.com/21115243/85251094-5eafe780-b493-11ea-9d8a-c306fec311cc.png)
+
+# [EXPERIMENTAL] [22 Jun. 2020] writing the wannier90 format
+You can write the wannier90 file format.
+Wannier90 is in [here](http://www.wannier.org)
+It might be useful to have the wannier90_hr format. 
+
+```julia
+    la2 = set_Lattice(2,[[1,0],[0,1]])
+    add_atoms!(la2,[0,0])
+
+    show_neighbors(la2)
+
+    t = 1.0
+    add_hoppings!(la2,-t,1,1,[1,0])
+    add_hoppings!(la2,-t,1,1,[0,1])
+    ham2 = hamiltonian_k(la2)
+
+    kmin = [-π,-π]
+    kmax = [0.0,0.0]
+    nk = 20
+    vec_k,energies = calc_band(kmin,kmax,nk,la2,ham2)
+    println("Energies on the line from (-π,π) to (0,0)")
+    println(energies)
+
+    las = make_supercell(la2,[2,2])
+    ham2s = hamiltonian_k(las)
+
+    vec_ks,energiess = calc_band(kmin,kmax,nk,las,ham2s)
+    println("Energies on the line from (-π,π) to (0,0)")
+    println(energiess)
+    
+    write_hr(la2,filename="2dsample_hr.dat")
+    write_hr(las,filename="2dsample_sp_hr.dat")
+```
+
+write_hr function writes a Lattice type struct as wannier90_hr.dat format
+
