@@ -9,6 +9,16 @@ function test_1D()
     nk = 20
     vec_k,energies = calc_band(kmin,kmax,nk,la1,ham1)
     println(energies)
+
+    las = TightBinding.make_supercell(la1,[2])
+    ham1s = hamiltonian_k(las)
+    kmin = [-π]
+    kmax = [π]
+    nk = 20
+    vec_k,energies2 = calc_band(kmin,kmax,nk,las,ham1s)
+    println(energies2)
+
+    #write_hr(la1,filename="1dsample_hr.dat")
     return energies
 
     pls = plot(vec_k[1,:],energies[1,:],marker=:circle,label=["1D"])
@@ -35,6 +45,18 @@ function test_2Dsquare()
     vec_k,energies = calc_band(kmin,kmax,nk,la2,ham2)
     println("Energies on the line from (-π,π) to (0,0)")
     println(energies)
+
+    las = TightBinding.make_supercell(la2,[2,2])
+    ham2s = hamiltonian_k(las)
+    #println(ham2s([0.1,2.1]))
+    #e,v = eigen(ham2s([0.1,2.1]))
+    #println(e)
+    vec_ks,energiess = calc_band(kmin,kmax,nk,las,ham2s)
+    println("Energies on the line from (-π,π) to (0,0)")
+    println(energiess)
+    
+    write_hr(la2,filename="2dsample_hr.dat")
+    write_hr(las,filename="2dsample_sp_hr.dat")
     return energies
 
 
@@ -265,6 +287,10 @@ function test_pnictides_5orbitals()
     #pls = plot_fermisurface_2D(la)
     #return pls
 
+    write_hr(la,filename="pnictide_5band_hr.dat")
+    las = TightBinding.make_supercell(la,[2,2])
+    write_hr(las,filename="pnictide_5band_2x2_hr.dat")
+
     nk = 100
     klines = set_Klines()
     kmin = [0,0]
@@ -363,6 +389,7 @@ function test_surface()
     Hk(k) = Ax*sin(k[1]).*σx +  Ay*sin(k[2]).*σy + m(k).*σz
     norb = 2 #The size of the matrix
     hamiltonian = surfaceHamiltonian(Hk,norb,numhop=3,L=32,kpara="kx",BC="OBC")
+
 
     nkx = 100
     kxs = range(-π,stop=π ,length=nkx)

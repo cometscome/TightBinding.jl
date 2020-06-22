@@ -13,6 +13,14 @@
         lw = 0.5
         ls = :dash
         colors = ["red","blue","orange","brown","yellow"]
+        function colfunc(i) 
+            if lattice.numatoms <= 6
+                return colors[i]
+            else
+                return HSV((i-1)*360/lattice.numatoms,100,100)
+            end
+        end
+        
         println("Plot the 2D lattice structure")
         if dim != 2
             println("Error! dim should be 2 to plot the lattice. dim is $dim")
@@ -40,7 +48,7 @@
 
                 for i=1:lattice.numatoms
                     x,y = get_position(lattice,lattice.positions[i])
-                    plot!([x+rorigin[1]],[y+rorigin[2]],marker=:circle,color=colors[i])
+                    plot!([x+rorigin[1]],[y+rorigin[2]],marker=:circle,color=colfunc(i))
                 end
 
                 for i=1:lattice.numhopps

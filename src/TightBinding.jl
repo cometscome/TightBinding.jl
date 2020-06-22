@@ -8,7 +8,8 @@ module TightBinding
     using Requires
     export set_Lattice,add_atoms!,add_hoppings!,add_diagonals!,hamiltonian_k,
     dispersion,get_position,calc_band,get_position_kspace,hamiltonian_k_1d,
-    set_Klines,show_neighbors,add_Kpoints!,set_onsite!,set_μ!
+    set_Klines,show_neighbors,add_Kpoints!,set_onsite!,set_μ!,
+    write_hr,make_supercell
     #,calc_band_plot,plotfuncs,
     #plot_lattice_2d,calc_band_plot_finite,plot_DOS
     
@@ -64,6 +65,35 @@ module TightBinding
         diagonals::Array{Float64,1}
         rvectors::Array{Array{Float64,1},1} #reciplocal lattice vectors
         μ::Float64
+    end
+
+    function Base.display(lattice::Lattice)
+        println("Dimension: ", lattice.dim)
+        println("Unit vectors ")
+        for id=1:lattice.dim
+            println(lattice.vectors[id])
+        end
+        println("Reciplocal lattice vectors ")
+        for id=1:lattice.dim
+            println(lattice.rvectors[id])
+        end
+        println("Chemical potential: ", lattice.μ)
+        println("num. of atoms ",lattice.numatoms)
+        for i=1:lattice.numatoms
+            println("$(i)-th atom ",lattice.positions[i], " onsite energy: ", lattice.diagonals[i])
+        end
+        
+        println("num. of hoppings ",lattice.numhopps)
+        if lattice.numhopps != 0
+            println("iband jband hopping amplitude")
+            for i=1:lattice.numhopps
+                hopping = lattice.hoppings[i]
+                iband = hopping.ijatoms[1]
+                jband = hopping.ijatoms[2]
+                println("$iband $jband $(hopping.ijpositions) $(hopping.amplitude)")
+            end
+        end
+        
     end
 
     """
@@ -281,7 +311,293 @@ module TightBinding
         k -> calc_ham(k)
     end
 
+    function find_orbital(lattice::Lattice,position)
+        position_sp  =position[:]
+        for id=1:lattice.dim
+            while position_sp[id] >= 1
+                position_sp[id] -= 1
+            end
+            while position_sp[id] < 0
+                position_sp[id] += 1
+            end
+        end
 
+        for iatom = 1:lattice.numatoms
+            if norm(lattice.positions[iatom] - position_sp) < 1e-15
+                return iatom
+            end
+        end
+        println(position_sp)
+        error("Orbital index was not found")
+    end
+
+    function make_supercell(lattice::Lattice,supercell)
+        @assert lattice.dim == length(supercell)
+        numatoms = lattice.numatoms
+        
+        vectors = deepcopy(lattice.vectors)
+        for id = 1:lattice.dim
+            vectors[id][:] = supercell[id]*vectors[id][:]
+        end
+        
+        lattice_super = set_Lattice(lattice.dim,vectors)
+        diagonals = zeros(Float64,numatoms*prod(supercell))
+
+        set_μ!(lattice_super,lattice.μ)
+        
+        
+        if lattice.dim == 1
+            icount = 0
+            for i1 = 1:supercell[1]
+                for iatom =1:numatoms
+                    position = lattice.positions[iatom][1] + (i1-1) #*lattice.vectors[1][1]
+                    position /= supercell[1]
+                    add_atoms!(lattice_super,[position])
+#                    icount += 1
+                    icount = (i1-1)*numatoms + iatom
+                    diagonals[icount] = lattice.diagonals[iatom]
+                end
+            end
+
+            set_onsite!(lattice_super,diagonals)
+
+            #=
+            for iatom=1:lattice_super.numatoms
+                jatom =find_orbital(lattice_super,lattice_super.positions[iatom])
+                println("$jatom $iatom")
+            end
+            =#
+
+            for δ=1:lattice.numhopps
+                hopping = lattice.hoppings[δ] #Type:
+                iband=hopping.ijatoms[1]
+                jband=hopping.ijatoms[2]
+                hopposition = hopping.ijpositions
+                hopposition_sp = hopposition[:]/supercell[1]
+                v = hopping.amplitude
+                #println("$iband $jband $hopposition $hopposition_sp")
+                for i1 = 1:supercell[1]
+                    iiband = (i1-1)*numatoms + iband
+                    atomposition_i = lattice_super.positions[iiband][:]
+                    iatom = find_orbital(lattice_super,atomposition_i)
+                    atomposition_j = atomposition_i[:] + hopposition_sp[:]
+                    jatom =find_orbital(lattice_super,atomposition_j)
+                    #println("$iatom $jatom $atomposition_i $atomposition_j")
+                    add_hoppings!(lattice_super,v,iatom,jatom,hopposition_sp)
+                end
+            end
+
+                
+
+        elseif lattice.dim == 2
+
+            for i1 = 1:supercell[1]
+                for i2 = 1:supercell[2]
+                    for iatom =1:numatoms
+                        position_x = (lattice.positions[iatom][1] + (i1-1))/supercell[1]
+                        position_y = (lattice.positions[iatom][2] + (i2-1))/supercell[2]
+
+                        add_atoms!(lattice_super,[position_x,position_y])
+    #                    icount += 1
+                        icount = ((i2-1)*supercell[1] + (i1-1))*numatoms + iatom
+                        diagonals[icount] = lattice.diagonals[iatom]
+                    end
+                end
+            end
+            set_onsite!(lattice_super,diagonals)
+
+            for δ=1:lattice.numhopps
+                hopping = lattice.hoppings[δ] #Type:
+                iband=hopping.ijatoms[1]
+                jband=hopping.ijatoms[2]
+                hopposition = deepcopy(hopping.ijpositions)
+                #println(hopposition)
+                hopposition_sp = hopposition[:]
+                hopposition_sp[1] /= supercell[1]
+                hopposition_sp[2] /= supercell[2]
+
+                v = hopping.amplitude
+                #println("$iband $jband $hopposition $hopposition_sp")
+                for i1 = 1:supercell[1]
+                    for i2 = 1:supercell[2]
+                        iiband = ((i2-1)*supercell[1]+(i1-1))*numatoms + iband
+                        atomposition_i = lattice_super.positions[iiband][:]
+                        iatom = find_orbital(lattice_super,atomposition_i)
+                        atomposition_j = atomposition_i[:] + hopposition_sp[:]
+                        jatom =find_orbital(lattice_super,atomposition_j)
+                        #println("$iatom $jatom $atomposition_i $atomposition_j")
+                        add_hoppings!(lattice_super,v,iatom,jatom,hopposition_sp)
+                        positionindex = get_positionindex(lattice_super,atomposition_j)
+                        #println("positionindex $positionindex")
+                    end
+                end
+            end
+
+
+
+        elseif lattice.dim == 3
+            for i1 = 1:supercell[1]
+                for i2 = 1:supercell[2]
+                    for i3 = 1:supercell[3]
+                        for iatom =1:numatoms
+                            position_x = (lattice.positions[iatom][1] + (i1-1))/supercell[1]
+                            position_y = (lattice.positions[iatom][2] + (i2-1))/supercell[2]
+                            position_z = (lattice.positions[iatom][3] + (i3-1))/supercell[3]
+
+                            add_atoms!(lattice_super,[position_x,position_y,position_z])
+        #                    icount += 1
+                            icount = (((i3-1)*supercell[2]+i2-1)*supercell[1] + (i1-1))*numatoms + iatom
+                            diagonals[icount] = lattice.diagonals[iatom]
+                        end
+                    end
+                end
+            end
+            set_onsite!(lattice_super,diagonals)
+
+            for δ=1:lattice.numhopps
+                hopping = lattice.hoppings[δ] #Type:
+                iband=hopping.ijatoms[1]
+                jband=hopping.ijatoms[2]
+                hopposition = deepcopy(hopping.ijpositions)
+                #println(hopposition)
+                hopposition_sp = hopposition[:]
+                hopposition_sp[1] /= supercell[1]
+                hopposition_sp[2] /= supercell[2]
+                hopposition_sp[3] /= supercell[3]
+
+                v = hopping.amplitude
+                #println("$iband $jband $hopposition $hopposition_sp")
+                for i1 = 1:supercell[1]
+                    for i2 = 1:supercell[2]
+                        for i3 = 1:supercell[3]
+                            iiband = (((i3-1)*supercell[2]+i2-1)*supercell[1]+(i1-1))*numatoms + iband
+                            atomposition_i = lattice_super.positions[iiband][:]
+                            iatom = find_orbital(lattice_super,atomposition_i)
+                            atomposition_j = atomposition_i[:] + hopposition_sp[:]
+                            jatom =find_orbital(lattice_super,atomposition_j)
+                            #println("$iatom $jatom $atomposition_i $atomposition_j")
+                            add_hoppings!(lattice_super,v,iatom,jatom,hopposition_sp)
+                        end
+                    end
+                end
+            end
+        end
+
+        return lattice_super
+    end
+
+    function get_positionindex(lattice::Lattice,position)
+        position_sp  =position[:]
+        positionindex = zeros(Int64,lattice.dim)
+        for id=1:lattice.dim
+            while position_sp[id] >= 1
+                positionindex[id] += 1
+                position_sp[id] -= 1
+            end
+            while position_sp[id] < 0
+                positionindex[id] -= 1
+                position_sp[id] += 1
+            end
+        end
+        return positionindex
+
+    end
+
+    function write_hr(lattice::Lattice;filename="wannier90_hr.dat")
+        numatoms = lattice.numatoms
+        diagonals = zeros(Float64,numatoms)
+        vectors = lattice.vectors
+        μ = lattice.μ
+        for i=1:length(lattice.diagonals)
+            diagonals[i] = lattice.diagonals[i]-μ
+        end
+        hopdata = Array{Int64,1}[]
+        valdata = Array{Float64,1}[]
+        for i=1:numatoms
+            v = diagonals[i]
+            iband = i
+            jband = i
+            hop = [0,0,0,iband,jband]
+            val = [real(v),-imag(v)] 
+            push!(hopdata,hop)
+            push!(valdata,val)
+        end
+        if lattice.numhopps != 0
+            for δ=1:lattice.numhopps
+                hopping = lattice.hoppings[δ] #Type:
+                iband=hopping.ijatoms[1]
+                jband=hopping.ijatoms[2]
+                hopposition = hopping.ijpositions[:]
+
+                atomposition_i = lattice.positions[iband][:]
+                atomposition_j = atomposition_i[:] + hopposition[:]
+                
+                positionindex = get_positionindex(lattice,atomposition_j)
+
+
+                v = hopping.amplitude
+                if lattice.dim == 1
+                    hop = [positionindex[1],0,0,iband,jband]
+                elseif lattice.dim == 2
+                    hop = [positionindex[1],positionindex[2],0,iband,jband]
+                elseif lattice.dim == 3
+                    hop = [positionindex[1],positionindex[2],positionindex[3],iband,jband]
+                end
+                val = [real(v),-imag(v)] 
+                push!(hopdata,hop)
+                push!(valdata,val)
+
+                
+                if lattice.dim == 1
+                    hop = [-positionindex[1],0,0,jband,iband]
+                elseif lattice.dim == 2
+                    hop = [-positionindex[1],-positionindex[2],0,jband,iband]
+                elseif lattice.dim == 3
+                    hop = [-positionindex[1],-positionindex[2],-positionindex[3],jband,iband]
+                end
+                val = [real(v),imag(v)] 
+                push!(hopdata,hop)
+                push!(valdata,val)
+                
+            end
+        end
+        count = length(hopdata)
+
+        fp = open(filename,"w")
+        println(fp,"generated by TightBinding.jl")
+        println(fp,numatoms)
+        println(fp,count)
+        num = div(count,15)
+        nmod = count % 15
+        for j=1:num
+            for i=1:15
+                print(fp,1,"\t")
+            end
+            println(fp,"\t")
+        end
+        if nmod != 0
+            for i=1:nmod
+                print(fp,1,"\t")
+            end
+            println(fp,"\t")
+        end
+
+        for i=1:count
+            hop = hopdata[i]
+            val = valdata[i]
+            ix = hop[1]
+            iy = hop[2]
+            iz = hop[3]
+            μ = hop[4]
+            ν = hop[5]
+
+            println(fp,"$ix\t$iy\t$iz\t$μ\t$ν\t$(val[1])\t$(val[2])")
+        end
+        close(fp)
+
+        #println(hopdata)
+        #println(valdata)
+    end
 
     function hamiltonian_k(lattice)
         numatoms = lattice.numatoms
