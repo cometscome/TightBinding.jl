@@ -13,6 +13,7 @@ This can
 4. plot the band structure of the finite-width system with one surface or boundary.
 5. [09 Feb. 2019] make surface Hamiltonian from the momentum space Hamiltonian.
 6. [19 Nov. 2019] get DOS data and energy mesh
+7. [22 Jun. 2020] construct a supercell model
 
 There is the sample jupyter notebook.
 
@@ -461,3 +462,53 @@ You can see the surface state.
 
 ![tes2](https://user-images.githubusercontent.com/21115243/52520885-38304880-2cb2-11e9-9aba-3654fa48a85d.png)
 
+# [22 Jun. 2020] constructing supercell model
+We can construct supercell model.
+## 2x2 Graphene
+We make the graphene: 
+
+
+```julia
+using TightBinding
+#Primitive vectors
+a1 = [sqrt(3)/2,1/2]
+a2= [0,1]
+#set lattice
+la = set_Lattice(2,[a1,a2])
+#add atoms
+add_atoms!(la,[1/3,1/3])
+add_atoms!(la,[2/3,2/3])
+
+#construct hoppings
+t = 1.0
+add_hoppings!(la,-t,1,2,[1/3,1/3])
+add_hoppings!(la,-t,1,2,[-2/3,1/3])
+add_hoppings!(la,-t,1,2,[1/3,-2/3])
+
+```
+
+Then, use make_supercell command: 
+
+```julia
+la_2x2 = make_supercell(la,[2,2])
+```
+
+Then, you can have the supercell model: 
+
+```julia
+using Plots
+#show the lattice structure
+plot_lattice_2d(la_2x2)
+```
+
+![2x2graphne](https://user-images.githubusercontent.com/21115243/85250988-109ae400-b493-11ea-9d31-94cec3607456.png)
+
+The density of states is same: 
+
+```julia
+# Density of states
+nk = 100 #numer ob meshes. nk^d meshes are used. d is a dimension.
+plot_DOS(la_2x2, nk)
+```
+
+![2x2dos](https://user-images.githubusercontent.com/21115243/85251094-5eafe780-b493-11ea-9d8a-c306fec311cc.png)
