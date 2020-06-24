@@ -311,7 +311,7 @@ module TightBinding
         k -> calc_ham(k)
     end
 
-    function find_orbital(lattice::Lattice,position)
+    function find_orbital(lattice::Lattice,supercell,position,iorbital)
         position_sp  =position[:]
         for id=1:lattice.dim
             while position_sp[id] >= 1
@@ -322,11 +322,46 @@ module TightBinding
             end
         end
 
-        for iatom = 1:lattice.numatoms
-            if norm(lattice.positions[iatom] - position_sp) < 1e-15
-                return iatom
+        originalnumatoms = div(lattice.numatoms,prod(supercell))
+
+        position_ori  =position_sp[:]
+        positionindex = zeros(Int64,lattice.dim)
+        
+        for id=1:lattice.dim
+            position_ori[id] *= supercell[id]
+            while position_ori[id] >= 1
+                position_ori[id] -= 1
+                positionindex[id] += 1
+            end
+            while position_ori[id] < 0
+                position_ori[id] += 1
+                positionindex[id] += 1
             end
         end
+        #println("positionindex $positionindex")
+        
+        if lattice.dim == 1
+            iatom = ( positionindex[1])*originalnumatoms + iorbital
+        elseif lattice.dim == 2
+            iatom = ((positionindex[2])*supercell[1] + positionindex[1])*originalnumatoms + iorbital
+        elseif lattice.dim == 3
+            iatom = ((positionindex[3]*supercell[2]+positionindex[2])*supercell[1] + positionindex[1])*originalnumatoms + iorbital
+        end
+        
+        #println("iorbital $iorbital iatom $iatom")
+        return iatom
+
+
+        for iatom = 1:lattice.numatoms
+            if norm(lattice.positions[iatom] - position_sp) < 1e-15
+                push!(iatomcandidate,iatom)
+#                return iatom
+            end
+        end
+        if length(iatomcandidate) != 0
+            return iatomcandidate[iorbital]
+        end
+
         println(position_sp)
         error("Orbital index was not found")
     end
@@ -379,9 +414,11 @@ module TightBinding
                 for i1 = 1:supercell[1]
                     iiband = (i1-1)*numatoms + iband
                     atomposition_i = lattice_super.positions[iiband][:]
-                    iatom = find_orbital(lattice_super,atomposition_i)
+                    iatom = find_orbital(lattice_super,supercell,atomposition_i,iband)
+#                    iatom = find_orbital(lattice_super,atomposition_i)
                     atomposition_j = atomposition_i[:] + hopposition_sp[:]
-                    jatom =find_orbital(lattice_super,atomposition_j)
+#                    jatom =find_orbital(lattice_super,atomposition_j)
+                    jatom =find_orbital(lattice_super,supercell,atomposition_j,jband)
                     #println("$iatom $jatom $atomposition_i $atomposition_j")
                     add_hoppings!(lattice_super,v,iatom,jatom,hopposition_sp)
                 end
@@ -422,9 +459,13 @@ module TightBinding
                     for i2 = 1:supercell[2]
                         iiband = ((i2-1)*supercell[1]+(i1-1))*numatoms + iband
                         atomposition_i = lattice_super.positions[iiband][:]
-                        iatom = find_orbital(lattice_super,atomposition_i)
+                        iatom = find_orbital(lattice_super,supercell,atomposition_i,iband)
+                        #println("iband iatom $iband $iatom")
+#                        iatom = find_orbital(lattice_super,atomposition_i)
+                        
                         atomposition_j = atomposition_i[:] + hopposition_sp[:]
-                        jatom =find_orbital(lattice_super,atomposition_j)
+#                        jatom =find_orbital(lattice_super,atomposition_j)
+                        jatom =find_orbital(lattice_super,supercell,atomposition_j,jband)
                         #println("$iatom $jatom $atomposition_i $atomposition_j")
                         add_hoppings!(lattice_super,v,iatom,jatom,hopposition_sp)
                         positionindex = get_positionindex(lattice_super,atomposition_j)
@@ -472,9 +513,11 @@ module TightBinding
                         for i3 = 1:supercell[3]
                             iiband = (((i3-1)*supercell[2]+i2-1)*supercell[1]+(i1-1))*numatoms + iband
                             atomposition_i = lattice_super.positions[iiband][:]
-                            iatom = find_orbital(lattice_super,atomposition_i)
+                            iatom = find_orbital(lattice_super,supercell,atomposition_i,iband)
+#                            iatom = find_orbital(lattice_super,atomposition_i)
                             atomposition_j = atomposition_i[:] + hopposition_sp[:]
-                            jatom =find_orbital(lattice_super,atomposition_j)
+                            jatom =find_orbital(lattice_super,supercell,atomposition_j,jband)
+#                            jatom =find_orbital(lattice_super,atomposition_j)
                             #println("$iatom $jatom $atomposition_i $atomposition_j")
                             add_hoppings!(lattice_super,v,iatom,jatom,hopposition_sp)
                         end
@@ -615,7 +658,7 @@ module TightBinding
             end
         end
 
-        count = hopcount*numatoms*numatoms
+        count = hopcount #*numatoms*numatoms
 
         fp = open(filename,"w")
         println(fp,"generated by TightBinding.jl")

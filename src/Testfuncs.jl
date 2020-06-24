@@ -134,6 +134,8 @@ function test_pnictides()
     #savefig("Fe.png")
     #return pls
 
+    
+
     ham = hamiltonian_k(la)
     kx = 0.1
     ky = 0.2
@@ -291,6 +293,9 @@ function test_pnictides_5orbitals()
     las = TightBinding.make_supercell(la,[2,2])
     write_hr(las,filename="pnictide_5band_2x2_hr.dat")
 
+    #display(la)
+    #display(las)
+
     nk = 100
     klines = set_Klines()
     kmin = [0,0]
@@ -306,7 +311,10 @@ function test_pnictides_5orbitals()
     add_Kpoints!(klines,kmin,kmax,"(pi,pi)","(0,0)",nk=nk)
 
     pls = calc_band_plot(klines,la)
-    #savefig("Fe5band.png")
+    savefig("Fe5band.png")
+
+    pls = calc_band_plot(klines,las)
+    savefig("Fe5band_2x2.png")
     #return pls
 
     ham = hamiltonian_k(la)
