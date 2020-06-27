@@ -640,8 +640,9 @@ module TightBinding
         for iatom = 1:lattice.numatoms
             add_atoms!(la_hr,lattice.positions[iatom][:])
         end
-        set_onsite!(la_hr,lattice.diagonals)
+        
         set_μ!(la_hr,lattice.μ)
+        diagonals = zeros(Float64,lattice.numatoms)
         
 
         data = readlines(pwd()*"/"*filename)
@@ -686,6 +687,7 @@ module TightBinding
                     @assert ν == iband
                     @assert μ == jband
                     if sum(abs.(hops)) == 0 && iband == jband
+                        diagonals[iband] = parse(Float64,u[6])
                     else
                         tij = parse(Float64,u[6])-im*parse(Float64,u[7])
 
@@ -714,6 +716,8 @@ module TightBinding
                 end
             end
         end
+
+        set_onsite!(la_hr,diagonals .+ lattice.μ)
 
         return cut_hg(la_hr)
 

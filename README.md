@@ -514,7 +514,7 @@ plot_DOS(la_2x2, nk)
 
 ![2x2dos](https://user-images.githubusercontent.com/21115243/85251094-5eafe780-b493-11ea-9d8a-c306fec311cc.png)
 
-# [EXPERIMENTAL] [22 Jun. 2020] writing the wannier90 format
+# [22 Jun. 2020] writing the wannier90 format
 You can write the wannier90 file format.
 Wannier90 is in [here](http://www.wannier.org)
 It might be useful to have the wannier90_hr format. 
@@ -549,4 +549,75 @@ It might be useful to have the wannier90_hr format.
 ```
 
 write_hr function writes a Lattice type struct as wannier90_hr.dat format
+
+# [27 Jun. 2020] reading the wannier90 format
+You can read the wannier90_hr format. 
+For example, we write the wannier90 format for 5-band Fe-based superconductor as shown above. 
+Then, we have la as Lattice type. 
+We build a supercell for example.
+
+```julia
+las = make_supercell(la,[2,2])
+```
+
+Then, write las as the wannier90_hr format. 
+
+```julia
+write_hr(las,filename="pnictide_5band_2x2_hr.dat")
+```
+
+In the wannier90 format, there is no information about lattice vectors and positions of atoms.
+We have to define these before reading the file. 
+So we make new Lattice type.
+In our example, the lattice vectors are [2,0] and [0,2]. 
+So, we add 
+
+```julia
+la_new = set_Lattice(2,[[2,0],[0,2]])
+```
+
+and there 20 atoms whose positions are 
+
+```julia
+println(las.positions)
+```
+
+```
+[[0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.5, 0.0], [0.5, 0.0], [0.5, 0.0], [0.5, 0.0], [0.5, 0.0], [0.0, 0.5], [0.0, 0.5], [0.0, 0.5], [0.0, 0.5], [0.0, 0.5], [0.5, 0.5], [0.5, 0.5], [0.5, 0.5], [0.5, 0.5], [0.5, 0.5]]
+```
+
+We add these information to la_new. 
+
+```julia
+atoms = [[0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.5, 0.0], [0.5, 0.0], [0.5, 0.0], [0.5, 0.0], [0.5, 0.0], [0.0, 0.5], [0.0, 0.5], [0.0, 0.5], [0.0, 0.5], [0.0, 0.5], [0.5, 0.5], [0.5, 0.5], [0.5, 0.5], [0.5, 0.5], [0.5, 0.5]]
+for i=1:20
+    add_atoms!(la_new,atoms[i])
+end
+```
+
+And set the chemical potential
+
+```julia
+set_μ!(la_new,10.96)
+```
+If you do not set the chemical potential, the chemical potential is zero. 
+
+Then, we read the wannir90 format file. 
+
+```julia
+la_new = read_wannier(la_new,"pnictide_5band_2x2_hr.dat")
+```
+
+After reading it, you can plot Fermi surface etc.
+
+```julia
+plot_fermisurface_2D(la_new)
+```
+
+![Fe_FS_new](https://user-images.githubusercontent.com/21115243/85913609-38ae8c80-b871-11ea-82f8-ecbee7faeec9.png)
+
+
+
+
+
 
