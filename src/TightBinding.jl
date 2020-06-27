@@ -9,7 +9,7 @@ module TightBinding
     export set_Lattice,add_atoms!,add_hoppings!,add_diagonals!,hamiltonian_k,
     dispersion,get_position,calc_band,get_position_kspace,hamiltonian_k_1d,
     set_Klines,show_neighbors,add_Kpoints!,set_onsite!,set_μ!,
-    write_hr,make_supercell
+    write_hr,make_supercell,read_wannier
     #,calc_band_plot,plotfuncs,
     #plot_lattice_2d,calc_band_plot_finite,plot_DOS
     
@@ -84,6 +84,7 @@ module TightBinding
         end
         
         println("num. of hoppings ",lattice.numhopps)
+        
         if lattice.numhopps != 0
             println("iband jband hopping amplitude")
             for i=1:lattice.numhopps
@@ -93,6 +94,30 @@ module TightBinding
                 println("$iband $jband $(hopping.ijpositions) $(hopping.amplitude)")
             end
         end
+        
+
+        #=
+
+        #println("iband jband hopping amplitude")
+        for iatom=1:lattice.numatoms
+            for jatom=1:lattice.numatoms
+                for i=1:lattice.numhopps
+                    hopping = lattice.hoppings[i]
+                    iband = hopping.ijatoms[1]
+                    jband = hopping.ijatoms[2]
+                    if iatom == iband && jatom == jband
+                        
+                        if jatom < iatom
+                            println("$jband $iband $(-hopping.ijpositions) $(hopping.amplitude)")
+                        else
+                            println("$iband $jband $(hopping.ijpositions) $(hopping.amplitude)")
+                        end
+                    end
+                end
+            end
+        end
+        #println("num. of hoppings ",lattice.numhopps)
+        =#
         
     end
 
@@ -237,7 +262,12 @@ module TightBinding
             i = hopping.ijatoms[1]
             ri = lattice.positions[i]
             rhop = ri+hopping.ijpositions
-            iabhop = round.(Int,rhop).-1
+            
+
+            positionindex = get_positionindex(lattice,rhop)
+            iabhop = positionindex[:]
+
+#            iabhop = round.(Int,rhop).-1
             #j = hopping.ijatoms[2]
             push!(hopindices,iabhop)
         end
@@ -428,8 +458,8 @@ module TightBinding
 
         elseif lattice.dim == 2
 
-            for i1 = 1:supercell[1]
-                for i2 = 1:supercell[2]
+            for i2 = 1:supercell[2]
+                for i1 = 1:supercell[1]
                     for iatom =1:numatoms
                         position_x = (lattice.positions[iatom][1] + (i1-1))/supercell[1]
                         position_y = (lattice.positions[iatom][2] + (i2-1))/supercell[2]
@@ -455,8 +485,8 @@ module TightBinding
 
                 v = hopping.amplitude
                 #println("$iband $jband $hopposition $hopposition_sp")
-                for i1 = 1:supercell[1]
-                    for i2 = 1:supercell[2]
+                for i2 = 1:supercell[2]
+                    for i1 = 1:supercell[1]
                         iiband = ((i2-1)*supercell[1]+(i1-1))*numatoms + iband
                         atomposition_i = lattice_super.positions[iiband][:]
                         iatom = find_orbital(lattice_super,supercell,atomposition_i,iband)
@@ -477,9 +507,9 @@ module TightBinding
 
 
         elseif lattice.dim == 3
-            for i1 = 1:supercell[1]
+            for i3 = 1:supercell[3]
                 for i2 = 1:supercell[2]
-                    for i3 = 1:supercell[3]
+                    for i1 = 1:supercell[1]
                         for iatom =1:numatoms
                             position_x = (lattice.positions[iatom][1] + (i1-1))/supercell[1]
                             position_y = (lattice.positions[iatom][2] + (i2-1))/supercell[2]
@@ -508,9 +538,9 @@ module TightBinding
 
                 v = hopping.amplitude
                 #println("$iband $jband $hopposition $hopposition_sp")
-                for i1 = 1:supercell[1]
+                for i3 = 1:supercell[3]
                     for i2 = 1:supercell[2]
-                        for i3 = 1:supercell[3]
+                        for i1 = 1:supercell[1]
                             iiband = (((i3-1)*supercell[2]+i2-1)*supercell[1]+(i1-1))*numatoms + iband
                             atomposition_i = lattice_super.positions[iiband][:]
                             iatom = find_orbital(lattice_super,supercell,atomposition_i,iband)
@@ -530,6 +560,22 @@ module TightBinding
     end
 
     function get_positionindex(lattice::Lattice,position)
+
+
+        positionindex = zeros(Int64,lattice.dim)
+        for id=1:lattice.dim
+            positionindex[id] = round(Int,position[id],RoundDown)
+            #=
+            if position[id] < 0
+                positionindex[id] = -round(Int,-position[id],RoundDown)-1
+            else
+                positionindex[id] = round(Int,position[id],RoundDown)
+            end
+            =#
+        end
+
+        return positionindex
+
         position_sp  =position[:]
         positionindex = zeros(Int64,lattice.dim)
         for id=1:lattice.dim
@@ -546,8 +592,138 @@ module TightBinding
 
     end
 
+    function cut_hg(lattice::Lattice)
+        numatoms = lattice.numatoms
+        la = set_Lattice(lattice.dim,lattice.vectors)
+        hopindices = get_hopindex(lattice)
+
+        for iatom = 1:lattice.numatoms
+            add_atoms!(la,lattice.positions[iatom][:])
+        end
+        set_onsite!(la,lattice.diagonals)
+        set_μ!(la,lattice.μ)
+
+        if lattice.numhopps != 0
+            for δ=1:lattice.numhopps
+                hopping = lattice.hoppings[δ] #Type:
+                iband=hopping.ijatoms[1]
+                jband=hopping.ijatoms[2]
+                hoppositions = hopping.ijpositions
+                v = hopping.amplitude
+
+                double = false
+                if δ > 1
+                    for δ2=1:δ-1
+                        hopping2 = lattice.hoppings[δ2] #Type:
+                        iband2=hopping2.ijatoms[1]
+                        jband2=hopping2.ijatoms[2]
+                        hoppositions2 = -hopping2.ijpositions
+                        if iband == jband2 && jband == iband2 &&  norm(hoppositions2-hoppositions) == 0 && δ2 != δ
+                            double = true
+                            break
+                        end
+                    end
+                end
+                if double == false
+                    add_hoppings!(la,v,iband,jband,hoppositions)
+                end
+            end
+        end
+
+        return la
+        
+    end
+
+    function read_wannier(lattice::Lattice,filename)
+        la_hr = set_Lattice(lattice.dim,lattice.vectors)
+
+        for iatom = 1:lattice.numatoms
+            add_atoms!(la_hr,lattice.positions[iatom][:])
+        end
+        set_onsite!(la_hr,lattice.diagonals)
+        set_μ!(la_hr,lattice.μ)
+        
+
+        data = readlines(pwd()*"/"*filename)
+        i = 2
+        u = data[i]
+        #println(u)
+        num_wann = parse(Int64,u)
+        @assert num_wann == lattice.numatoms
+        i = 3
+        nrpts = parse(Int64,data[i])
+        factors = zeros(Int64,nrpts)
+
+        num = div(nrpts,15)
+        nmod = nrpts % 15
+        count = 0
+        for j=1:num
+            i += 1
+            u = split(data[i])
+            for k=1:15
+                count += 1
+                factors[count] = parse(Int64,u[k])
+            end
+        end
+        if nmod != 0
+            i += 1
+            u = split(data[i])
+            for k=1:nmod
+                count += 1
+                factors[count] = parse(Int64,u[k])
+            end
+        end
+
+
+        for k=1:nrpts
+            for μ=1:num_wann
+                for ν=1:num_wann
+                    i += 1
+                    u = split(data[i])
+                    hops = parse.(Int64,u[1:3])
+                    iband = parse(Int64,u[4])
+                    jband = parse(Int64,u[5])
+                    @assert ν == iband
+                    @assert μ == jband
+                    if sum(abs.(hops)) == 0 && iband == jband
+                    else
+                        tij = parse(Float64,u[6])-im*parse(Float64,u[7])
+
+                        if abs(tij) != 0
+                            #atomposition_i = lattice.positions[iband][:]
+                            #atomposition_j = lattice.positions[jband][:] 
+
+                            Ri = lattice.positions[iband][:]
+                            Rj = lattice.positions[jband][:]
+                            for id=1:lattice.dim
+                                Rj[id] += hops[id]
+                            end
+                            dr = Rj-Ri
+
+
+                            #for id=1:lattice.dim
+                            #    atomposition_j[id] += hops[id]#*lattice.vectors[id][:]
+                            #end
+                            #hopping = atomposition_j- atomposition_i
+                            
+                            #add_hoppings!(la_hr,tij,jband,iband,-hopping)
+                            add_hoppings!(la_hr,tij,iband,jband,dr)
+                        end
+                    end
+
+                end
+            end
+        end
+
+        return cut_hg(la_hr)
+
+
+    end
+
     function write_hr(lattice::Lattice;filename="wannier90_hr.dat",maxhop = 10)
         numatoms = lattice.numatoms
+        hopindices = get_hopindex(lattice)
+
         
         diagonals = zeros(Float64,numatoms)
         vectors = lattice.vectors
@@ -569,6 +745,17 @@ module TightBinding
         if lattice.numhopps != 0
             for δ=1:lattice.numhopps
                 hopping = lattice.hoppings[δ] #Type:
+                #positionindex = hopindices[δ][:]
+                iband=hopping.ijatoms[1]
+                jband=hopping.ijatoms[2]
+
+
+                ri = lattice.positions[iband][:]
+                rhop = ri+hopping.ijpositions
+                positionindex = get_positionindex(lattice,rhop)
+
+                #=
+                hopping = lattice.hoppings[δ] #Type:
                 iband=hopping.ijatoms[1]
                 jband=hopping.ijatoms[2]
                 hopposition = hopping.ijpositions[:]
@@ -577,7 +764,20 @@ module TightBinding
                 atomposition_j = atomposition_i[:] + hopposition[:]
                 
                 positionindex = get_positionindex(lattice,atomposition_j)
-
+                =#
+                #=
+                Ri = lattice.positions[iband][:]
+                Rj = lattice.positions[jband][:]
+                for id=1:lattice.dim
+                    Rj[id] += positionindex[id]
+                end
+                dr = Rj-Ri
+                if norm(dr - hopping.ijpositions) != 0
+                    println("positionindex: $positionindex")
+                    println("Ri $Ri Rj $Rj")
+                    println("dr $dr ijpositions",hopping.ijpositions)
+                end
+                =#
 
                 v = hopping.amplitude
                 if lattice.dim == 1
@@ -587,19 +787,42 @@ module TightBinding
                 elseif lattice.dim == 3
                     hop = [positionindex[1],positionindex[2],positionindex[3],iband,jband]
                 end
-                val = [real(v),-imag(v)] 
+                val = [real(v),imag(v)] 
                 push!(hopdata,hop)
                 push!(valdata,val)
 
+                ri = lattice.positions[jband][:]
+                rhop = ri-hopping.ijpositions
+
+
+                positionindex = get_positionindex(lattice,rhop)
+
+                #=
+
+                Ri = lattice.positions[jband][:]
+                Rj = lattice.positions[iband][:]
+                for id=1:lattice.dim
+                    Rj[id] += positionindex[id]
+                end
+                dr = Rj-Ri
+                if norm(dr + hopping.ijpositions) != 0
+                    println("rhop $rhop")
+                    println("positionindex: $positionindex")
+                    println("Ri $Ri Rj $Rj")
+                    println("oriRj ", lattice.positions[iband][:])
+                    println("dr $dr ijpositions",-hopping.ijpositions)
+                end
+                =#
+
                 
                 if lattice.dim == 1
-                    hop = [-positionindex[1],0,0,jband,iband]
+                    hop = [positionindex[1],0,0,jband,iband]
                 elseif lattice.dim == 2
-                    hop = [-positionindex[1],-positionindex[2],0,jband,iband]
+                    hop = [positionindex[1],positionindex[2],0,jband,iband]
                 elseif lattice.dim == 3
-                    hop = [-positionindex[1],-positionindex[2],-positionindex[3],jband,iband]
+                    hop = [positionindex[1],positionindex[2],positionindex[3],jband,iband]
                 end
-                val = [real(v),imag(v)] 
+                val = [real(v),-imag(v)] 
                 push!(hopdata,hop)
                 push!(valdata,val)
                 
@@ -685,9 +908,9 @@ module TightBinding
                     ix = i1 - maxhop-1
                     iy = 0
                     iz = 0
-                    for μ=1:numatoms
-                        for ν=1:numatoms
-                            val = [real(hopmatrix[i1,1,1,μ,ν]),imag(hopmatrix[i1,1,1,μ,ν])]
+                    for ν=1:numatoms
+                        for μ=1:numatoms
+                            val = [real(hopmatrix[i1,1,1,μ,ν]),-imag(hopmatrix[i1,1,1,μ,ν])]
                             println(fp,"$ix\t$iy\t$iz\t$μ\t$ν\t$(val[1])\t$(val[2])")
                         end
                     end
@@ -700,8 +923,9 @@ module TightBinding
                         ix = i1 - maxhop-1
                         iy = i2 - maxhop-1
                         iz = 0
-                        for μ=1:numatoms
-                            for ν=1:numatoms
+                        
+                        for ν=1:numatoms
+                            for μ=1:numatoms
                                 val = [real(hopmatrix[i1,i2,1,μ,ν]),imag(hopmatrix[i1,i2,1,μ,ν])]
                                 println(fp,"$ix\t$iy\t$iz\t$μ\t$ν\t$(val[1])\t$(val[2])")
                             end
@@ -719,8 +943,8 @@ module TightBinding
                             iz = i3 - maxhop-1
                             
 
-                            for μ=1:numatoms
-                                for ν=1:numatoms
+                            for ν=1:numatoms
+                                for μ=1:numatoms
                                     val = [real(hopmatrix[i1,i2,i3,μ,ν]),imag(hopmatrix[i1,i2,i3,μ,ν])]
                                     println(fp,"$ix\t$iy\t$iz\t$μ\t$ν\t$(val[1])\t$(val[2])")
                                 end
@@ -730,6 +954,7 @@ module TightBinding
                 end
             end
         end
+        close(fp)
         return 
 
 
