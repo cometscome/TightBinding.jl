@@ -12,9 +12,9 @@ SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 
 [compat]
-Requires = "1.0"
-Dierckx = "0.4"
+Dierckx = "0.4, 0.5"
 Plots = "1.4"
+Requires = "1.0"
 StatsBase = "0.33"
 
 [extras]
