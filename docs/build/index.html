@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Home · TightBinding.jl</title><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.11.1/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="assets/documenter.js"></script><script src="siteinfo.js"></script><script src="../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/documenter-dark.css" data-theme-name="documenter-dark"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit">TightBinding.jl</span></div><form class="docs-search" action="search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li class="is-active"><a class="tocitem" href>Home</a><ul class="internal"><li class="toplevel"><a class="tocitem" href="#TightBinding.jl-2"><span>TightBinding.jl</span></a></li><li><a class="tocitem" href="#Install"><span>Install</span></a></li><li class="toplevel"><a class="tocitem" href="#samples"><span>samples</span></a></li><li><a class="tocitem" href="#Graphene"><span>Graphene</span></a></li><li><a class="tocitem" href="#Graphene-nano-ribbon"><span>Graphene nano-ribbon</span></a></li><li><a class="tocitem" href="#Fe-based-superconductor"><span>Fe-based superconductor</span></a></li><li><a class="tocitem" href="#Fe-based-superconductor:-5-orbital-model"><span>Fe-based superconductor: 5 orbital model</span></a></li><li class="toplevel"><a class="tocitem" href="#[09-Feb.-2019]-Making-surface-Hamiltonian-from-the-momentum-space-Hamiltonian"><span>[09 Feb. 2019] Making surface Hamiltonian from the momentum space Hamiltonian</span></a></li><li class="toplevel"><a class="tocitem" href="#[22-Jun.-2020]-constructing-supercell-model"><span>[22 Jun. 2020] constructing supercell model</span></a></li><li><a class="tocitem" href="#x2-Graphene"><span>2x2 Graphene</span></a></li><li class="toplevel"><a class="tocitem" href="#[22-Jun.-2020]-writing-the-wannier90-format"><span>[22 Jun. 2020] writing the wannier90 format</span></a></li><li class="toplevel"><a class="tocitem" href="#[27-Jun.-2020]-reading-the-wannier90-format"><span>[27 Jun. 2020] reading the wannier90 format</span></a></li></ul></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>Home</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Home</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/cometscome/TightBinding.jl/blob/master/docs/src/index.md#L" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="TightBinding.jl"><a class="docs-heading-anchor" href="#TightBinding.jl">TightBinding.jl</a><a id="TightBinding.jl-1"></a><a class="docs-heading-anchor-permalink" href="#TightBinding.jl" title="Permalink"></a></h1><p><a href="https://travis-ci.org/cometscome/TightBinding.jl"><img src="https://travis-ci.org/cometscome/TightBinding.jl.svg?branch=master" alt="Build Status"/></a> <a href="https://coveralls.io/github/cometscome/TightBinding.jl?branch=master"><img src="https://coveralls.io/repos/github/cometscome/TightBinding.jl/badge.svg?branch=master" alt="Coverage Status"/></a></p><h1 id="TightBinding.jl-2"><a class="docs-heading-anchor" href="#TightBinding.jl-2">TightBinding.jl</a><a class="docs-heading-anchor-permalink" href="#TightBinding.jl-2" title="Permalink"></a></h1><p>This can construct the tight-binding model and calculate energies in Julia 1.0. This software is released under the MIT License, see LICENSE.</p><p>This can</p><ol><li>construct the Hamiltonian as a functional of a momentum k.</li><li>plot the band structure.</li><li>show the crystal structure.</li><li>plot the band structure of the finite-width system with one surface or boundary.</li><li>[09 Feb. 2019] make surface Hamiltonian from the momentum space Hamiltonian.</li><li>[19 Nov. 2019] get DOS data and energy mesh</li><li>[22 Jun. 2020] construct a supercell model</li><li>[EXPERIMENTAL][22 Jun. 2020] write Wannier90 format.</li></ol><p>There is the sample jupyter notebook.</p><h2 id="Install"><a class="docs-heading-anchor" href="#Install">Install</a><a id="Install-1"></a><a class="docs-heading-anchor-permalink" href="#Install" title="Permalink"></a></h2><p>Push &quot;]&quot; to enter the package mode.</p><pre><code class="language-none">add TightBinding</code></pre><h1 id="samples"><a class="docs-heading-anchor" href="#samples">samples</a><a id="samples-1"></a><a class="docs-heading-anchor-permalink" href="#samples" title="Permalink"></a></h1><h2 id="Graphene"><a class="docs-heading-anchor" href="#Graphene">Graphene</a><a id="Graphene-1"></a><a class="docs-heading-anchor-permalink" href="#Graphene" title="Permalink"></a></h2><p>Here is a Graphene case</p><pre><code class="language-julia">using TightBinding
+#Primitive vectors
+a1 = [sqrt(3)/2,1/2]
+a2= [0,1]
+#set lattice
+la = set_Lattice(2,[a1,a2])
+#add atoms
+add_atoms!(la,[1/3,1/3])
+add_atoms!(la,[2/3,2/3])</code></pre><p>Then we added two atoms (atom 1 and atom 2). We can see the possible hoppings.</p><pre><code class="language-julia">show_neighbors(la)</code></pre><p>Output is</p><pre><code class="language-none">Possible hoppings
+(1,1), x:-1//1, y:-1//1
+(1,2), x:-2//3, y:-2//3
+(2,2), x:-1//1, y:-1//1
+(1,1), x:-1//1, y:0//1
+(1,2), x:-2//3, y:1//3
+(2,2), x:-1//1, y:0//1
+(1,1), x:-1//1, y:1//1
+(1,2), x:-2//3, y:4//3
+(2,2), x:-1//1, y:1//1
+(1,1), x:0//1, y:-1//1
+(1,2), x:1//3, y:-2//3
+(2,2), x:0//1, y:-1//1
+(1,1), x:0//1, y:0//1
+(1,2), x:1//3, y:1//3
+(2,2), x:0//1, y:0//1
+(1,1), x:0//1, y:1//1
+(1,2), x:1//3, y:4//3
+(2,2), x:0//1, y:1//1
+(1,1), x:1//1, y:-1//1
+(1,2), x:4//3, y:-2//3
+(2,2), x:1//1, y:-1//1
+(1,1), x:1//1, y:0//1
+(1,2), x:4//3, y:1//3
+(2,2), x:1//1, y:0//1
+(1,1), x:1//1, y:1//1
+(2,2), x:1//1, y:1//1</code></pre><p>If you want to construct the Graphene, you choose hoppings from atom 1 to atom 2:</p><pre><code class="language-julia">#construct hoppings
+t = 1.0
+add_hoppings!(la,-t,1,2,[1/3,1/3])
+add_hoppings!(la,-t,1,2,[-2/3,1/3])
+add_hoppings!(la,-t,1,2,[1/3,-2/3])</code></pre><pre><code class="language-julia">using Plots
+#show the lattice structure
+plot_lattice_2d(la)</code></pre><p><img src="https://user-images.githubusercontent.com/21115243/46902071-aa0da680-cef9-11e8-9d4b-3cfa41633dc9.png" alt="68747470733a2f2f71696974612d696d6167652d73746f72652e73332e616d617a6f6e6177732e636f6d2f302f3234363131332f37346633306563662d356137632d643337362d393235642d6561663563343634376362632e706e67"/></p><pre><code class="language-julia">using Plots
+# Density of states
+nk = 100 #numer ob meshes. nk^d meshes are used. d is a dimension.
+plot_DOS(la, nk)</code></pre><p><img src="https://user-images.githubusercontent.com/21115243/46902081-cc072900-cef9-11e8-8e22-908f91b132a8.png" alt="68747470733a2f2f71696974612d696d6167652d73746f72652e73332e616d617a6f6e6177732e636f6d2f302f3234363131332f39343635643263312d643466332d333634372d363036652d3836626263313462313530622e706e67"/></p><p>[19 Nov. 2019]  We can get DOS data and energy mesh. </p><pre><code class="language-julia">nk = 100 #numer ob meshes. nk^d meshes are used. d is a dimension.
+hist = get_DOS(la, nk)
+println(hist.weights) #DOS data
+println(hist.edges[1]) #energy mesh
+using Plots
+plot(hist.edges[1][2:end] .- hist.edges[1].step.hi/2,hist.weights)</code></pre><pre><code class="language-julia">#show the band structure
+klines = set_Klines()
+kmin = [0,0]
+kmax = [2π/sqrt(3),0]
+add_Kpoints!(klines,kmin,kmax,&quot;G&quot;,&quot;K&quot;)
+
+kmin = [2π/sqrt(3),0]
+kmax = [2π/sqrt(3),2π/3]
+add_Kpoints!(klines,kmin,kmax,&quot;K&quot;,&quot;M&quot;)
+
+kmin = [2π/sqrt(3),2π/3]
+kmax = [0,0]
+add_Kpoints!(klines,kmin,kmax,&quot;M&quot;,&quot;G&quot;)
+calc_band_plot(klines,la)</code></pre><p><img src="https://user-images.githubusercontent.com/21115243/46902092-f22cc900-cef9-11e8-85be-948a0e7d3dae.png" alt="68747470733a2f2f71696974612d696d6167652d73746f72652e73332e616d617a6f6e6177732e636f6d2f302f3234363131332f32616530653833392d633239642d333166332d336533332d3136343164376431636230382e706e67"/></p><h2 id="Graphene-nano-ribbon"><a class="docs-heading-anchor" href="#Graphene-nano-ribbon">Graphene nano-ribbon</a><a id="Graphene-nano-ribbon-1"></a><a class="docs-heading-anchor-permalink" href="#Graphene-nano-ribbon" title="Permalink"></a></h2><pre><code class="language-julia">using Plots
+#We have already constructed atoms and hoppings.
+#We add the line to plot
+klines = set_Klines()
+kmin = [-π]
+kmax = [π]
+add_Kpoints!(klines,kmin,kmax,&quot;-pi&quot;,&quot;pi&quot;)</code></pre><pre><code class="language-julia">#We consider the periodic boundary condition along the primitive vector
+direction = 1
+#Periodic boundary condition
+calc_band_plot_finite(klines,la,direction,periodic=true)</code></pre><p><img src="https://user-images.githubusercontent.com/21115243/46902101-315b1a00-cefa-11e8-9e41-01ffe464a3b1.png" alt="68747470733a2f2f71696974612d696d6167652d73746f72652e73332e616d617a6f6e6177732e636f6d2f302f3234363131332f66323033656365632d393835322d303931612d336332382d3662633463386138356666312e706e67"/></p><pre><code class="language-julia">#We introduce the surface perpendicular to the premitive vector
+direction = 1
+#Open boundary condition
+calc_band_plot_finite(klines,la,direction,periodic=false)</code></pre><p><img src="https://user-images.githubusercontent.com/21115243/46902102-34eea100-cefa-11e8-8abf-9216a3163ac4.png" alt="68747470733a2f2f71696974612d696d6167652d73746f72652e73332e616d617a6f6e6177732e636f6d2f302f3234363131332f36313038363162632d316538302d343364632d303064322d3035643237663865383435652e706e67"/></p><h2 id="Fe-based-superconductor"><a class="docs-heading-anchor" href="#Fe-based-superconductor">Fe-based superconductor</a><a id="Fe-based-superconductor-1"></a><a class="docs-heading-anchor-permalink" href="#Fe-based-superconductor" title="Permalink"></a></h2><p>We construct two-band model for Fe-based superconductor [S. Rachu et al. Phys. Rev. B 77, 220503(R) (2008)].</p><pre><code class="language-Julia">la = set_Lattice(2,[[1,0],[0,1]]) #Square lattice
+add_atoms!(la,[0,0]) #dxz orbital
+add_atoms!(la,[0,0]) #dyz orbital
+#hoppings
+t1 = -1.0
+t2 = 1.3
+t3 = -0.85
+t4 = t3
+μ = 1.45
+
+#dxz
+add_hoppings!(la,-t1,1,1,[1,0])
+add_hoppings!(la,-t2,1,1,[0,1])
+add_hoppings!(la,-t3,1,1,[1,1])
+add_hoppings!(la,-t3,1,1,[1,-1])
+
+#dyz
+add_hoppings!(la,-t2,2,2,[1,0])
+add_hoppings!(la,-t1,2,2,[0,1])
+add_hoppings!(la,-t3,2,2,[1,1])
+add_hoppings!(la,-t3,2,2,[1,-1])
+
+#between dxz and dyz
+add_hoppings!(la,-t4,1,2,[1,1])
+add_hoppings!(la,-t4,1,2,[-1,-1])
+add_hoppings!(la,t4,1,2,[1,-1])
+add_hoppings!(la,t4,1,2,[-1,1])
+
+#Chemical potentials
+set_μ!(la,μ) #set the chemical potential</code></pre><p>To see the band structure, we use</p><pre><code class="language-julia">klines = set_Klines()
+kmin = [0,0]
+kmax = [π,0]
+add_Kpoints!(klines,kmin,kmax,&quot;(0,0)&quot;,&quot;(pi,0)&quot;)
+
+kmin = [π,0]
+kmax = [π,π]
+add_Kpoints!(klines,kmin,kmax,&quot;(pi,0)&quot;,&quot;(pi,pi)&quot;)
+
+kmin = [π,π]
+kmax = [0,0]
+add_Kpoints!(klines,kmin,kmax,&quot;(pi,pi)&quot;,&quot;(0,0)&quot;)
+
+using Plots
+pls = calc_band_plot(klines,la)</code></pre><p>Then, we have the band structure:</p><p><img src="https://user-images.githubusercontent.com/21115243/46902455-a3cef880-cf00-11e8-97b8-ddb92038ccc1.png" alt="fe"/></p><p>We can obtain the Hamiltonian:</p><pre><code class="language-julia">ham = hamiltonian_k(la) #we can obtain the function &quot;ham([kx,ky])&quot;.
+kx = 0.1
+ky = 0.2
+hamk = ham([kx,ky]) #ham is a functional of k=[kx,ky].
+println(hamk)</code></pre><h2 id="Fe-based-superconductor:-5-orbital-model"><a class="docs-heading-anchor" href="#Fe-based-superconductor:-5-orbital-model">Fe-based superconductor: 5 orbital model</a><a id="Fe-based-superconductor:-5-orbital-model-1"></a><a class="docs-heading-anchor-permalink" href="#Fe-based-superconductor:-5-orbital-model" title="Permalink"></a></h2><p>Finally, we show the 5-orbital model proposed by K. Kuroki et al.[K. Kuroki et al., Phys. Rev. Lett. 101, 087004  (2008)]. The sample code is</p><pre><code class="language-julia">la = set_Lattice(2,[[1,0],[0,1]])
+add_atoms!(la,[0,0])
+add_atoms!(la,[0,0])
+add_atoms!(la,[0,0])
+add_atoms!(la,[0,0])
+add_atoms!(la,[0,0])
+
+tmat = [
+-0.7    0 -0.4  0.2 -0.1
+-0.8    0    0    0    0
+ 0.8 -1.5    0    0 -0.3
+   0  1.7    0    0 -0.1
+-3.0    0    0 -0.2    0
+-2.1  1.5    0    0    0
+ 1.3    0  0.2 -0.2    0
+ 1.7    0    0  0.2    0
+-2.5  1.4    0    0    0
+-2.1  3.3    0 -0.3  0.7
+ 1.7  0.2    0  0.2    0
+ 2.5    0    0  0.3    0
+ 1.6  1.2 -0.3 -0.3 -0.3
+   0    0    0 -0.1    0
+ 3.1 -0.7 -0.2    0    0
+]
+tmat = 0.1.*tmat
+imap = zeros(Int64,5,5)
+count = 0
+for μ=1:5
+    for ν=μ:5
+        count += 1
+        imap[μ,ν] = count
+    end
+end
+Is = [1,-1,-1,1,1,1,1,-1,-1,1,-1,-1,1,1,1]
+σds = [1,-1,1,1,-1,1,-1,-1,1,1,1,-1,1,-1,1]
+tmat_σy = tmat[:,:]
+tmat_σy[imap[1,2],:] = -tmat[imap[1,3],:]
+tmat_σy[imap[1,3],:] = -tmat[imap[1,2],:]
+tmat_σy[imap[1,4],:] = -tmat[imap[1,4],:]
+tmat_σy[imap[2,2],:] = tmat[imap[3,3],:]
+tmat_σy[imap[2,4],:] = tmat[imap[3,4],:]
+tmat_σy[imap[2,5],:] = -tmat[imap[3,5],:]
+tmat_σy[imap[3,3],:] = tmat[imap[2,2],:]
+tmat_σy[imap[3,4],:] = tmat[imap[2,4],:]
+tmat_σy[imap[3,5],:] = -tmat[imap[2,5],:]
+tmat_σy[imap[4,5],:] = -tmat[imap[4,5],:]
+
+hoppingmatrix = zeros(Float64,5,5,5,5)
+hops = [-2,-1,0,1,2]
+hopelements = [[1,0],[1,1],[2,0],[2,1],[2,2]]
+
+for μ = 1:5
+    for ν=μ:5
+        for ii=1:5
+            ihop = hopelements[ii][1]
+            jhop = hopelements[ii][2]
+            #[a,b],[a,-b],[-a,-b],[-a,b],[b,a],[b,-a],[-b,a],[-b,-a]
+
+            #[a,b]
+            i = ihop +3
+            j = jhop +3
+            hoppingmatrix[μ,ν,i,j]=tmat[imap[μ,ν],ii]
+            #[a,-b] = σy*[a,b] [1,1] -&gt; [1,-1]
+            if jhop != 0
+                i = ihop +3
+                j = -jhop +3
+                hoppingmatrix[μ,ν,i,j]=tmat_σy[imap[μ,ν],ii]
+            end
+
+            if μ != ν
+                #[-a,-b] = I*[a,b] [1,1] -&gt; [-1,-1],[1,0]-&gt;[-1,0]
+                i = -ihop +3
+                j = -jhop +3
+                hoppingmatrix[μ,ν,i,j]=Is[imap[μ,ν]]*tmat[imap[μ,ν],ii]
+                #[-a,b] = I*[a,-b] = I*σy*[a,b]  #[2,0]-&gt;[-2,0]
+                if jhop != 0
+                    i = -ihop +3
+                    j = jhop +3
+                    hoppingmatrix[μ,ν,i,j]=Is[imap[μ,ν]]*tmat_σy[imap[μ,ν],ii]
+                end
+            end
+            #[b,a],[b,-a],[-b,a],[-b,-a]
+            if jhop != ihop
+                #[b,a] = σd*[a,b]
+                i = jhop +3
+                j = ihop +3
+                hoppingmatrix[μ,ν,i,j]=σds[imap[μ,ν]]*tmat[imap[μ,ν],ii]
+                #[-b,a] = σd*σy*[a,b]
+                if jhop != 0
+                    i = -jhop +3
+                    j = ihop +3
+                    hoppingmatrix[μ,ν,i,j]=σds[imap[μ,ν]]*tmat_σy[imap[μ,ν],ii]
+                end
+
+                if μ != ν
+                    #[-b,-a] = σd*[-a,-b] = σd*I*[a,b]
+                    i = -jhop +3
+                    j = -ihop +3
+                    hoppingmatrix[μ,ν,i,j]=σds[imap[μ,ν]]*Is[imap[μ,ν]]*tmat[imap[μ,ν],ii]
+                    #[b,-a] = σd*[-a,b] = σd*I*[a,-b] = σd*I*σy*[a,b]  #[2,0]-&gt;[-2,0]
+                    if jhop != 0
+                        i = jhop +3
+                        j = -ihop +3
+                        hoppingmatrix[μ,ν,i,j]=σds[imap[μ,ν]]*Is[imap[μ,ν]]*tmat_σy[imap[μ,ν],ii]
+                    end
+                end
+            end
+        end
+
+
+    end
+end
+
+for μ=1:5
+    for ν=μ:5
+        for i = 1:5
+            ih = hops[i]
+            for j = 1:5
+                jh = hops[j]
+                if hoppingmatrix[μ,ν,i,j] != 0.0                
+                    add_hoppings!(la,hoppingmatrix[μ,ν,i,j],μ,ν,[ih,jh])
+                end
+            end
+        end
+    end
+end
+
+onsite = [10.75,10.96,10.96,11.12,10.62]
+set_onsite!(la,onsite)
+
+set_μ!(la,10.96) #set the chemical potential</code></pre><p>Then, we plot the band structure</p><pre><code class="language-julia">nk = 100
+klines = set_Klines()
+kmin = [0,0]
+kmax = [π,0]
+add_Kpoints!(klines,kmin,kmax,&quot;(0,0)&quot;,&quot;(pi,0)&quot;,nk=nk)
+
+kmin = [π,0]
+kmax = [π,π]
+add_Kpoints!(klines,kmin,kmax,&quot;(pi,0)&quot;,&quot;(pi,pi)&quot;,nk=nk)
+
+kmin = [π,π]
+kmax = [0,0]
+add_Kpoints!(klines,kmin,kmax,&quot;(pi,pi)&quot;,&quot;(0,0)&quot;,nk=nk)
+
+using Plots
+pls = calc_band_plot(klines,la)
+savefig(&quot;Fe5band.png&quot;)</code></pre><p>We have the band structure:</p><p><img src="https://user-images.githubusercontent.com/21115243/46914868-2f6a8700-cfde-11e8-8f40-a052cd66b473.png" alt="fe5band"/></p><p>This figure is consistent with Fig.2 in the paper where the hopping table is used [T. Nomura, J. Phys. Soc. Jpn. 78, 034716 (2009)].</p><p>The Fermi surface is given by</p><pre><code class="language-julia">pls = plot_fermisurface_2D(la)</code></pre><p><img src="https://user-images.githubusercontent.com/21115243/46914887-b28bdd00-cfde-11e8-9021-16077f960ad5.png" alt="fefermi"/></p><h1 id="[09-Feb.-2019]-Making-surface-Hamiltonian-from-the-momentum-space-Hamiltonian"><a class="docs-heading-anchor" href="#[09-Feb.-2019]-Making-surface-Hamiltonian-from-the-momentum-space-Hamiltonian">[09 Feb. 2019] Making surface Hamiltonian from the momentum space Hamiltonian</a><a id="[09-Feb.-2019]-Making-surface-Hamiltonian-from-the-momentum-space-Hamiltonian-1"></a><a class="docs-heading-anchor-permalink" href="#[09-Feb.-2019]-Making-surface-Hamiltonian-from-the-momentum-space-Hamiltonian" title="Permalink"></a></h1><p>If we have the Hamiltonian defined in momentum space, we can construct the surface Hamiltonian. For example, we consider a model of 2D topological insulator: </p><pre><code class="language-julia">using TightBinding
+Ax = 1
+Ay = 1
+m2x = 1
+m2y = m2x
+m0 = -2*m2x
+m(k) = m0 + 2m2x*(1-cos(k[1]))+2m2y*(1-cos(k[2]))
+Hk(k) = Ax*sin(k[1]).*σx +  Ay*sin(k[2]).*σy + m(k).*σz
+norb = 2 #The size of the matrix</code></pre><p>Now, when you use TightBinding.jl, the Pauli matrices σx,σy,σz,σ0 are defined. Then, </p><pre><code class="language-julia">hamiltonian = surfaceHamiltonian(Hk,norb,numhop=3,L=32,kpara=&quot;kx&quot;,BC=&quot;OBC&quot;)</code></pre><p>makes the function hamiltonian(k). We can choose open boundary condition OBC or  periodic boundary condition PBC. numhop determines the number of the maximum hoppings. numhop-th nearest neighbor hopping can be included. L detemines the size of the real space lattice. </p><pre><code class="language-julia">using Plots
+using LinearAlgebra
+nkx = 100
+kxs = range(-π,stop=π ,length=nkx)
+mat_e = zeros(Float64,nkx,32*2)
+for i=1:nkx
+    kx = kxs[i]
+    mat_h = hamiltonian(kx)
+    #println(mat_h)
+    
+    e,v = eigen(Matrix(mat_h))
+    #println(e)
+    mat_e[i,:] = real.(e[:])
+end
+plot(kxs,mat_e,labels=&quot;&quot;)
+savefig(&quot;tes1.png&quot;)</code></pre><p>You can see the surface state. </p><p><img src="https://user-images.githubusercontent.com/21115243/52520885-38304880-2cb2-11e9-9aba-3654fa48a85d.png" alt="tes2"/></p><h1 id="[22-Jun.-2020]-constructing-supercell-model"><a class="docs-heading-anchor" href="#[22-Jun.-2020]-constructing-supercell-model">[22 Jun. 2020] constructing supercell model</a><a id="[22-Jun.-2020]-constructing-supercell-model-1"></a><a class="docs-heading-anchor-permalink" href="#[22-Jun.-2020]-constructing-supercell-model" title="Permalink"></a></h1><p>We can construct supercell model.</p><h2 id="x2-Graphene"><a class="docs-heading-anchor" href="#x2-Graphene">2x2 Graphene</a><a id="x2-Graphene-1"></a><a class="docs-heading-anchor-permalink" href="#x2-Graphene" title="Permalink"></a></h2><p>We make the graphene: </p><pre><code class="language-julia">using TightBinding
+#Primitive vectors
+a1 = [sqrt(3)/2,1/2]
+a2= [0,1]
+#set lattice
+la = set_Lattice(2,[a1,a2])
+#add atoms
+add_atoms!(la,[1/3,1/3])
+add_atoms!(la,[2/3,2/3])
+
+#construct hoppings
+t = 1.0
+add_hoppings!(la,-t,1,2,[1/3,1/3])
+add_hoppings!(la,-t,1,2,[-2/3,1/3])
+add_hoppings!(la,-t,1,2,[1/3,-2/3])
+</code></pre><p>Then, use make_supercell command: </p><pre><code class="language-julia">la_2x2 = make_supercell(la,[2,2])</code></pre><p>Then, you can have the supercell model: </p><pre><code class="language-julia">using Plots
+#show the lattice structure
+plot_lattice_2d(la_2x2)</code></pre><p><img src="https://user-images.githubusercontent.com/21115243/85250988-109ae400-b493-11ea-9d31-94cec3607456.png" alt="2x2graphne"/></p><p>The density of states is same: </p><pre><code class="language-julia"># Density of states
+nk = 100 #numer ob meshes. nk^d meshes are used. d is a dimension.
+plot_DOS(la_2x2, nk)</code></pre><p><img src="https://user-images.githubusercontent.com/21115243/85251094-5eafe780-b493-11ea-9d8a-c306fec311cc.png" alt="2x2dos"/></p><h1 id="[22-Jun.-2020]-writing-the-wannier90-format"><a class="docs-heading-anchor" href="#[22-Jun.-2020]-writing-the-wannier90-format">[22 Jun. 2020] writing the wannier90 format</a><a id="[22-Jun.-2020]-writing-the-wannier90-format-1"></a><a class="docs-heading-anchor-permalink" href="#[22-Jun.-2020]-writing-the-wannier90-format" title="Permalink"></a></h1><p>You can write the wannier90 file format. Wannier90 is in <a href="http://www.wannier.org">here</a> It might be useful to have the wannier90_hr format. </p><pre><code class="language-julia">    la2 = set_Lattice(2,[[1,0],[0,1]])
+    add_atoms!(la2,[0,0])
+
+    show_neighbors(la2)
+
+    t = 1.0
+    add_hoppings!(la2,-t,1,1,[1,0])
+    add_hoppings!(la2,-t,1,1,[0,1])
+    ham2 = hamiltonian_k(la2)
+
+    kmin = [-π,-π]
+    kmax = [0.0,0.0]
+    nk = 20
+    vec_k,energies = calc_band(kmin,kmax,nk,la2,ham2)
+    println(&quot;Energies on the line from (-π,π) to (0,0)&quot;)
+    println(energies)
+
+    las = make_supercell(la2,[2,2])
+    ham2s = hamiltonian_k(las)
+
+    vec_ks,energiess = calc_band(kmin,kmax,nk,las,ham2s)
+    println(&quot;Energies on the line from (-π,π) to (0,0)&quot;)
+    println(energiess)
+    
+    write_hr(la2,filename=&quot;2dsample_hr.dat&quot;)
+    write_hr(las,filename=&quot;2dsample_sp_hr.dat&quot;)</code></pre><p>write<em>hr function writes a Lattice type struct as wannier90</em>hr.dat format</p><h1 id="[27-Jun.-2020]-reading-the-wannier90-format"><a class="docs-heading-anchor" href="#[27-Jun.-2020]-reading-the-wannier90-format">[27 Jun. 2020] reading the wannier90 format</a><a id="[27-Jun.-2020]-reading-the-wannier90-format-1"></a><a class="docs-heading-anchor-permalink" href="#[27-Jun.-2020]-reading-the-wannier90-format" title="Permalink"></a></h1><p>You can read the wannier90_hr format.  For example, we write the wannier90 format for 5-band Fe-based superconductor as shown above.  Then, we have la as Lattice type.  We build a supercell for example.</p><pre><code class="language-julia">las = make_supercell(la,[2,2])</code></pre><p>Then, write las as the wannier90_hr format. </p><pre><code class="language-julia">write_hr(las,filename=&quot;pnictide_5band_2x2_hr.dat&quot;)</code></pre><p>In the wannier90 format, there is no information about lattice vectors and positions of atoms. We have to define these before reading the file.  So we make new Lattice type. In our example, the lattice vectors are [2,0] and [0,2].  So, we add </p><pre><code class="language-julia">la_new = set_Lattice(2,[[2,0],[0,2]])</code></pre><p>and there 20 atoms whose positions are </p><pre><code class="language-julia">println(las.positions)</code></pre><pre><code class="language-none">[[0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.5, 0.0], [0.5, 0.0], [0.5, 0.0], [0.5, 0.0], [0.5, 0.0], [0.0, 0.5], [0.0, 0.5], [0.0, 0.5], [0.0, 0.5], [0.0, 0.5], [0.5, 0.5], [0.5, 0.5], [0.5, 0.5], [0.5, 0.5], [0.5, 0.5]]</code></pre><p>We add these information to la_new. </p><pre><code class="language-julia">atoms = [[0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.5, 0.0], [0.5, 0.0], [0.5, 0.0], [0.5, 0.0], [0.5, 0.0], [0.0, 0.5], [0.0, 0.5], [0.0, 0.5], [0.0, 0.5], [0.0, 0.5], [0.5, 0.5], [0.5, 0.5], [0.5, 0.5], [0.5, 0.5], [0.5, 0.5]]
+for i=1:20
+    add_atoms!(la_new,atoms[i])
+end</code></pre><p>And set the chemical potential</p><pre><code class="language-julia">set_μ!(la_new,10.96)</code></pre><p>If you do not set the chemical potential, the chemical potential is zero. </p><p>Then, we read the wannir90 format file. </p><pre><code class="language-julia">la_new = read_wannier(la_new,&quot;pnictide_5band_2x2_hr.dat&quot;)</code></pre><p>After reading it, you can plot Fermi surface etc.</p><pre><code class="language-julia">plot_fermisurface_2D(la_new)</code></pre><p><img src="https://user-images.githubusercontent.com/21115243/85913609-38ae8c80-b871-11ea-82f8-ecbee7faeec9.png" alt="Fe_FS_new"/></p><ul><li><a href="#TightBinding.plot_fermisurface_2D-Tuple{Any}"><code>TightBinding.plot_fermisurface_2D</code></a></li><li><a href="#TightBinding.set_Lattice-Tuple{Any,Any}"><code>TightBinding.set_Lattice</code></a></li></ul><article class="docstring"><header><a class="docstring-binding" id="TightBinding.plot_fermisurface_2D-Tuple{Any}" href="#TightBinding.plot_fermisurface_2D-Tuple{Any}"><code>TightBinding.plot_fermisurface_2D</code></a> — <span class="docstring-category">Method</span></header><section><div><pre><code class="language-julia">plot_fermisurface_2D(lattice::Lattice;Eshift = 0.0,nk = 20)</code></pre><p>Show the Fermi surface for 2D system. <br/>This plots the contour with E=0.0+Eshift <br/>Eshift: the energy shift from the chemical potential lattice.μ <br/>nk: the number of meshes in 2D momentum space. The total mesh is nk x nk.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/cometscome/TightBinding.jl/blob/039f6ba225ad2df9c3e0e4e1dbe47869a1d7ab9d/src/Plotfuncs.jl#LL68-L75">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="TightBinding.set_Lattice-Tuple{Any,Any}" href="#TightBinding.set_Lattice-Tuple{Any,Any}"><code>TightBinding.set_Lattice</code></a> — <span class="docstring-category">Method</span></header><section><div><pre><code class="language-julia">set_Lattice(dim::Integer,vectors::Array{Array{Float64,1},1})</code></pre><p>Initialize lattice. We have to call this before making Hamiltonian. dim: Dimension of the system. vector:: Primitive vectors.</p><p>Example:</p><p>1D system</p><pre><code class="language-julia">la1 = set_Lattice(1,[[1.0]])</code></pre><p>2D system</p><pre><code class="language-julia">a1 = [sqrt(3)/2,1/2]
+a2 = [0,1]
+la2 = set_Lattice(2,[a1,a2])</code></pre><p>3D system</p><pre><code class="language-julia">a1 = [1,0,0]
+a2 = [0,1,0]
+a3 = [0,0,1]
+la2 = set_Lattice(3,[a1,a2,a3])</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/cometscome/TightBinding.jl/blob/039f6ba225ad2df9c3e0e4e1dbe47869a1d7ab9d/src/TightBinding.jl#LL124-L155">source</a></section></article></article><nav class="docs-footer"><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Monday 28 September 2020 13:26">Monday 28 September 2020</span>. Using Julia version 1.5.0.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
