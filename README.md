@@ -4,6 +4,7 @@
 # TightBinding.jl
 This can construct the tight-binding model and calculate energies in Julia 1.0.
 This software is released under the MIT License, see LICENSE.
+We checked that it works in Julia 1.7.
 
 
 This can
