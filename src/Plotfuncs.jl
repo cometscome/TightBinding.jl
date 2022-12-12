@@ -2,6 +2,7 @@
 using .Plots
 using LinearAlgebra
 using StatsBase
+using ProgressBars
 #using ..TightBinding
 export plot_lattice_2d, calc_band_plot, plot_DOS, calc_band_plot_finite
 export plot_fermisurface_2D
@@ -75,11 +76,15 @@ function plot_lattice_2d(lattice)
                     color = colfunc(i),
                 )
             end
-
-            for i = 1:lattice.numhopps
-                ijpositions = lattice.hoppings[i].ijpositions
+            i = 0
+            for hoppings in lattice.hoppings
+                i += 1
+            #for i = 1:lattice.numhopps
+                ijpositions = hoppings.ijpositions
+                #ijpositions = lattice.hoppings[i].ijpositions
                 x, y = get_position(lattice, ijpositions)
-                ijatoms = lattice.hoppings[i].ijatoms
+                ijatoms = hoppings.ijatoms
+                #ijatoms = lattice.hoppings[i].ijatoms
                 x0, y0 = get_position(lattice, lattice.positions[ijatoms[1]])
                 plot!(
                     [x0 + rorigin[1], x0 + x + rorigin[1]],
@@ -167,7 +172,7 @@ function plot_fermisurface_2D(lattice; Eshift = 0.0, nk = 50)
 
 end
 
-function calc_band_plot(klines, lattice)
+function calc_band_plot(klines, lattice;ylim=nothing)
     ham = hamiltonian_k(lattice)
     numlines = klines.numlines
     dim = lattice.dim
@@ -180,6 +185,7 @@ function calc_band_plot(klines, lattice)
     xticks_labels = []
 
     for i = 1:numlines
+        println("$(klines.kpoints[i].name_start)-$(klines.kpoints[i].name_end) line")
         push!(xticks_values, klength)
         push!(xticks_labels, klines.kpoints[i].name_start)
         kmin = klines.kpoints[i].kmin
@@ -201,11 +207,19 @@ function calc_band_plot(klines, lattice)
         push!(xticks_labels, klines.kpoints[i].name_end)
     end
 
-    pls = plot(
-        vec_k[:],
-        [energies[i, :] for i = 1:numatoms],
-        xticks = (xticks_values, xticks_labels),
-    )
+    if ylim === nothing
+        pls = plot(
+            vec_k[:],
+            [energies[i, :] for i = 1:numatoms],
+            xticks = (xticks_values, xticks_labels),labels=nothing
+        )
+    else
+        pls = plot(
+            vec_k[:],
+            [energies[i, :] for i = 1:numatoms],
+            xticks = (xticks_values, xticks_labels),ylim=ylim,labels=nothing
+        )
+    end
 
     return pls
 end

@@ -1,11 +1,14 @@
 module TightBinding
 
 include("./TBfromk2r.jl")
+include("./wannier_module.jl")
 #using Plots
 #using .Plotfuncs
+using .Wannier
 using .TBfromk2r
 using LinearAlgebra
 using Requires
+using ProgressBars
 export set_Lattice,
     add_atoms!,
     add_hoppings!,
@@ -31,7 +34,7 @@ export surfaceHamiltonian, σx, σy, σz, σ0
 export get_DOS
 
 struct Hopping
-    amplitude::Any
+    amplitude::ComplexF64
     ijatoms::Array{Int64,1}
     ijpositions::Array{Float64,1}
 end
@@ -75,7 +78,8 @@ mutable struct Lattice
     numatoms::Int64
     positions::Array{Array{Float64,1},1}
     numhopps::Int64
-    hoppings::Array{Hopping,1}
+    #hoppings::Array{Hopping,1}
+    hoppings::Set{Hopping}
     diagonals::Array{Float64,1}
     rvectors::Array{Array{Float64,1},1} #reciplocal lattice vectors
     μ::Float64
@@ -174,7 +178,8 @@ la2 = set_Lattice(3,[a1,a2,a3])
 """
 function set_Lattice(dim, vectors)
     positions = Array{Float64,1}[]
-    hoppings = Array{Hopping,1}[]
+    hoppings = Set{Hopping}()
+    #hoppings = Array{Hopping,1}[]
     numatoms = 0
     numhopps = 0
     diagonals = Float64[]
@@ -252,8 +257,9 @@ end
 
 function add_hoppings!(lattice, amplitude, iatom, jatom, hopping)
     hop = Hopping(amplitude, [iatom, jatom], hopping)
-    lattice.numhopps += 1
+    #lattice.numhopps += 1
     push!(lattice.hoppings, hop)
+    lattice.numhopps = length(lattice.hoppings)
 end
 
 
@@ -286,8 +292,9 @@ end
 
 function get_hopindex(lattice)
     hopindices = []
-    for ihop = 1:lattice.numhopps
-        hopping = lattice.hoppings[ihop]
+    for hopping in lattice.hoppings
+    #for ihop = 1:lattice.numhopps
+        #hopping = lattice.hoppings[ihop]
         i = hopping.ijatoms[1]
         ri = lattice.positions[i]
         rhop = ri + hopping.ijpositions
@@ -324,9 +331,12 @@ function hamiltonian_k_1d(lattice, direction; nsites = 20, periodic = true)
                 ii = (isite - 1) * numatoms + i
                 realpart_ham[ii, ii] = diagonals[i]
             end
-            for ihop = 1:numhopps
+            ihop = 0
+            for hopping in lattice.hoppings
+                ihop += 1
+            #for ihop = 1:numhopps
                 δ = hopindices[ihop][direction]
-                hopping = lattice.hoppings[ihop]
+                #hopping = lattice.hoppings[ihop]
                 i = hopping.ijatoms[1]
                 ii = (isite - 1) * numatoms + i
                 jsite = isite + δ
@@ -467,9 +477,11 @@ function make_supercell(lattice::Lattice, supercell)
             println("$jatom $iatom")
         end
         =#
-
-        for δ = 1:lattice.numhopps
-            hopping = lattice.hoppings[δ] #Type:
+        δ = 0
+        for hopping in lattice.hoppings
+            δ += 1
+        #for δ = 1:lattice.numhopps
+            #hopping = lattice.hoppings[δ] #Type:
             iband = hopping.ijatoms[1]
             jband = hopping.ijatoms[2]
             hopposition = hopping.ijpositions
@@ -508,8 +520,11 @@ function make_supercell(lattice::Lattice, supercell)
         end
         set_onsite!(lattice_super, diagonals)
 
-        for δ = 1:lattice.numhopps
-            hopping = lattice.hoppings[δ] #Type:
+        δ = 0
+        for hopping in lattice.hoppings
+            δ += 1
+        #for δ = 1:lattice.numhopps
+            #hopping = lattice.hoppings[δ] #Type:
             iband = hopping.ijatoms[1]
             jband = hopping.ijatoms[2]
             hopposition = deepcopy(hopping.ijpositions)
@@ -562,8 +577,11 @@ function make_supercell(lattice::Lattice, supercell)
         end
         set_onsite!(lattice_super, diagonals)
 
-        for δ = 1:lattice.numhopps
-            hopping = lattice.hoppings[δ] #Type:
+        #for δ = 1:lattice.numhopps
+        δ = 0
+        for hopping in lattice.hoppings
+            δ += 1
+            #hopping = lattice.hoppings[δ] #Type:
             iband = hopping.ijatoms[1]
             jband = hopping.ijatoms[2]
             hopposition = deepcopy(hopping.ijpositions)
@@ -645,8 +663,12 @@ function cut_hg(lattice::Lattice)
     set_μ!(la, lattice.μ)
 
     if lattice.numhopps != 0
-        for δ = 1:lattice.numhopps
-            hopping = lattice.hoppings[δ] #Type:
+        δ = 0
+        
+        for hopping in lattice.hoppings
+            δ += 1
+        #for δ = 1:lattice.numhopps
+            #hopping = lattice.hoppings[δ] #Type:
             iband = hopping.ijatoms[1]
             jband = hopping.ijatoms[2]
             hoppositions = hopping.ijpositions
@@ -671,6 +693,7 @@ function cut_hg(lattice::Lattice)
             if double == false
                 add_hoppings!(la, v, iband, jband, hoppositions)
             end
+            println(δ,"/",lattice.numhopps)
         end
     end
 
@@ -718,9 +741,11 @@ function read_wannier(lattice::Lattice, filename)
             factors[count] = parse(Int64, u[k])
         end
     end
+    
 
-
-    for k = 1:nrpts
+    println("reading a wannier format")
+    #println(length(factors),"\t", nrpts)
+    for k in ProgressBar(1:nrpts) #1:nrpts
         for μ = 1:num_wann
             for ν = 1:num_wann
                 i += 1
@@ -734,6 +759,8 @@ function read_wannier(lattice::Lattice, filename)
                     diagonals[iband] = parse(Float64, u[6])
                 else
                     tij = parse(Float64, u[6]) - im * parse(Float64, u[7])
+                    #tij = parse(Float64, u[6]) + im * parse(Float64, u[7])
+
 
                     if abs(tij) != 0
                         #atomposition_i = lattice.positions[iband][:]
@@ -753,17 +780,20 @@ function read_wannier(lattice::Lattice, filename)
                         #hopping = atomposition_j- atomposition_i
 
                         #add_hoppings!(la_hr,tij,jband,iband,-hopping)
-                        add_hoppings!(la_hr, tij, iband, jband, dr)
+                        add_hoppings!(la_hr, tij/factors[k], iband, jband, dr)
                     end
                 end
 
             end
         end
+        #println(k,"/",nrpts)
+        #println(la_hr.numhopps)
     end
+
 
     set_onsite!(la_hr, diagonals .+ lattice.μ)
 
-    return cut_hg(la_hr)
+    return la_hr#cut_hg(la_hr)
 
 
 end
@@ -791,8 +821,11 @@ function write_hr(lattice::Lattice; filename = "wannier90_hr.dat", maxhop = 10)
         push!(valdata, val)
     end
     if lattice.numhopps != 0
-        for δ = 1:lattice.numhopps
-            hopping = lattice.hoppings[δ] #Type:
+        δ = 0
+        for hopping in lattice.hoppings
+            δ += 1
+        #for δ = 1:lattice.numhopps
+            #hopping = lattice.hoppings[δ] #Type:
             #positionindex = hopindices[δ][:]
             iband = hopping.ijatoms[1]
             jband = hopping.ijatoms[2]
@@ -1055,8 +1088,11 @@ function hamiltonian_k(lattice)
             realpart_ham[i, i] = diagonals[i]
         end
         if lattice.numhopps != 0
-            for δ = 1:lattice.numhopps
-                hopping = lattice.hoppings[δ] #Type:
+            δ = 0
+            for hopping in lattice.hoppings
+                δ += 1
+            #for δ = 1:lattice.numhopps
+                #hopping = lattice.hoppings[δ] #Type:
                 i = hopping.ijatoms[1]
                 j = hopping.ijatoms[2]
                 hop = hopping.ijpositions
@@ -1068,20 +1104,36 @@ function hamiltonian_k(lattice)
                 for idim = 1:lattice.dim
                     ak += k[idim] * vec_a[idim]
                 end
+                amp = hopping.amplitude*exp(im*ak)
 
-                ampcos = hopping.amplitude * cos(ak)
+                ampcos = real(amp)#hopping.amplitude * cos(ak)
                 realpart_ham[i, j] += ampcos
-                realpart_ham[j, i] += ampcos
-                ampsin = hopping.amplitude * sin(ak)
+                #realpart_ham[j, i] += ampcos
+                ampsin = imag(amp)
+                #ampsin = hopping.amplitude * sin(ak)
                 imagpart_ham[i, j] += ampsin
-                imagpart_ham[j, i] += -ampsin
+                #imagpart_ham[j, i] += -ampsin
 
             end
         end
         if sum(abs.(imagpart_ham)) == 0.0
             ham = realpart_ham[:, :]
+            for i=1:numatoms
+                for j=i:numatoms
+                        ham[i,j] = realpart_ham[j,i]
+
+                end
+            end
         else
             ham = realpart_ham[:, :] + im * imagpart_ham[:, :]
+            for i=1:numatoms
+                for j=i:numatoms
+                    ham[i,j] = conj(ham[j,i])
+                    if i==j
+                        ham[i,j] = real(ham[i,j])
+                    end
+                end
+            end
         end
 
         ham
@@ -1092,14 +1144,18 @@ end
 
 function dispersion(dim, n, ham, k)
     if n == 1
-        return [ham(k)[1]]
+        return real([ham(k)[1]])
     else
+        #println("dis")
+        #println(ham(k))
+        #println("dd")
         energy = eigen(ham(k)).values
         return energy
     end
 end
 
 function calc_band(kmin_real, kmax_real, nk, lattice, ham)
+    #println("cd")
     n = lattice.numatoms
     dim = lattice.dim
     energies = zeros(Float64, n, nk)
@@ -1108,8 +1164,12 @@ function calc_band(kmin_real, kmax_real, nk, lattice, ham)
         k = range(kmin_real[idim], length = nk, stop = kmax_real[idim])
         vec_k[idim, :] = k[:]
     end
-    for ik = 1:nk
-        energies[:, ik] = dispersion(dim, n, ham, vec_k[:, ik])
+    for ik = ProgressBar(1:nk)
+        #println("ik ",ik)
+        #println("ik = $ik ",vec_k[:, ik])
+        ene =  dispersion(dim, n, ham, vec_k[:, ik])
+        #println(ene)
+        energies[:, ik] = ene#dispersion(dim, n, ham, vec_k[:, ik])
     end
 
     return vec_k, energies
