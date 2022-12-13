@@ -1142,6 +1142,70 @@ function hamiltonian_k(lattice)
     k -> calc_ham(k)
 end
 
+function write_energydispersion(lattice,fileheader;nka=20,nkb=20,nkc=20)
+    ham = hamiltonian_k(lattice)
+    kas = range(0,1,length=nka)
+    kbs = range(0,1,length=nkb)
+    kcs = range(0,1,length=nkc)
+    b1 = lattice.rvectors[1]
+    b2 = lattice.rvectors[2]
+    b3 = lattice.rvectors[3]
+    fps = []
+    for i=1:lattice.numatoms
+        fp = open(fileheader*lpad("$i",3,"0")*".txt","w")
+        push!(fps,fp)
+    end
+
+    for ka in kas
+        for kb in kbs
+            for kc in kcs
+                println("$ka $kb $kc")
+                k = b1*ka + b2*kb + b3*kc
+                energy = eigen(ham(k)).values
+                for i=1:lattice.numatoms
+                    println(fps[i],"$(k[1]) $(k[2]) $(k[3]) $(energy[i])")
+                end
+            end
+        end
+    end
+    for i=1:lattice.numatoms
+        close(fps[i])
+    end
+
+end
+
+function write_energydispersion_abc(lattice,fileheader;nka=20,nkb=20,nkc=20)
+    ham = hamiltonian_k(lattice)
+    kas = range(0,1,length=nka)
+    kbs = range(0,1,length=nkb)
+    kcs = range(0,1,length=nkc)
+    b1 = lattice.rvectors[1]
+    b2 = lattice.rvectors[2]
+    b3 = lattice.rvectors[3]
+    fps = []
+    for i=1:lattice.numatoms
+        fp = open(fileheader*lpad("$i",3,"0")*".txt","w")
+        push!(fps,fp)
+    end
+
+    for ka in kas
+        for kb in kbs
+            for kc in kcs
+                println("$ka $kb $kc")
+                k = b1*ka + b2*kb + b3*kc
+                energy = eigen(ham(k)).values
+                for i=1:lattice.numatoms
+                    println(fps[i],"$(ka) $(kb) $(kc) $(energy[i])")
+                end
+            end
+        end
+    end
+    for i=1:lattice.numatoms
+        close(fps[i])
+    end
+
+end
+
 function dispersion(dim, n, ham, k)
     if n == 1
         return real([ham(k)[1]])
