@@ -676,15 +676,17 @@ function cut_hg(lattice::Lattice)
 
             double = false
             if δ > 1
-                for δ2 = 1:δ-1
-                    hopping2 = lattice.hoppings[δ2] #Type:
+                δ2 = 0
+                for hopping2 in lattice.hoppings
+                    δ2  += 1
+                #for δ2 = 1:δ-1
+                    #hopping2 = lattice.hoppings[δ2] #Type:
                     iband2 = hopping2.ijatoms[1]
                     jband2 = hopping2.ijatoms[2]
                     hoppositions2 = -hopping2.ijpositions
                     if iband == jband2 &&
                        jband == iband2 &&
-                       norm(hoppositions2 - hoppositions) == 0 &&
-                       δ2 != δ
+                       norm(hoppositions2 - hoppositions) == 0 && δ2 != δ
                         double = true
                         break
                     end
@@ -779,8 +781,8 @@ function read_wannier(lattice::Lattice, filename)
                         #end
                         #hopping = atomposition_j- atomposition_i
 
-                        #add_hoppings!(la_hr,tij,jband,iband,-hopping)
                         add_hoppings!(la_hr, tij/factors[k], iband, jband, dr)
+                        #add_hoppings!(la_hr, tij, iband, jband, dr)
                     end
                 end
 
@@ -1107,12 +1109,13 @@ function hamiltonian_k(lattice)
                 amp = hopping.amplitude*exp(im*ak)
 
                 ampcos = real(amp)#hopping.amplitude * cos(ak)
+                #println("$ampcos $i $j")
                 realpart_ham[i, j] += ampcos
-                #realpart_ham[j, i] += ampcos
+                realpart_ham[j, i] += ampcos
                 ampsin = imag(amp)
                 #ampsin = hopping.amplitude * sin(ak)
                 imagpart_ham[i, j] += ampsin
-                #imagpart_ham[j, i] += -ampsin
+                imagpart_ham[j, i] += -ampsin
 
             end
         end
@@ -1135,6 +1138,7 @@ function hamiltonian_k(lattice)
                 end
             end
         end
+        #println(ham)
 
         ham
 
@@ -1173,6 +1177,7 @@ function write_energydispersion(lattice,fileheader;nka=20,nkb=20,nkc=20)
     end
 
 end
+
 
 function write_energydispersion_abc(lattice,fileheader;nka=20,nkb=20,nkc=20)
     ham = hamiltonian_k(lattice)
